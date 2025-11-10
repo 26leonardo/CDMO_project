@@ -202,7 +202,7 @@ def build_sol_from_opp_home(T, W, P, Opp, Home, Per=None):
     return sol
 
 # ---------- solver runner ----------
-def run_solver(smt_path, solver, timeout_s):
+def run_solver(smt_path, solver, timeout_s, seed):
     """
     Run SMT solver with optimized configuration and robust error handling.
     
@@ -217,7 +217,7 @@ def run_solver(smt_path, solver, timeout_s):
         cmd = [
     solver, "-smt2", smt_path,
     "smt.phase_selection=4",
-       'smt.random_seed=0'  # Disable flattening that can vary
+       f'smt.random_seed={seed}'  # Disable flattening that can vary
 ]
     
     elif "cvc5" in solver_name:
@@ -225,10 +225,10 @@ def run_solver(smt_path, solver, timeout_s):
             solver, "--lang=smt2", smt_path,
             "--decision=internal",
             "--produce-models",
-            '--random-seed=0'
+            f'--random-seed={seed}'
         ]
     elif 'opti' in solver_name:
-        cmd=['optimathsat', smt_path]
+        cmd=['optimathsat-1.7.3-macos-64-bit/bin/optimathsat', smt_path]
     
     # Enhanced process execution
     start_time = time.time()
