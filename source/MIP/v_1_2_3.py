@@ -120,8 +120,8 @@ def build_model(
     'A','B','C','D' per abilitare rispettivamente i symmetry-breaking:
       A = anchor team k in week1 period1
       B = fix composition of first week (circle method)
-      C = canonical ordering of weeks by signature
-      D = canonical ordering of periods by signature
+      C = canonical ordering of weeks by weight
+      D = canonical ordering of periods by weight
     """
 
     assert n % 2 == 0 and n >= 2
@@ -278,33 +278,33 @@ def build_model(
             else:
                 prob += pulp.lpSum(x[(1, p, ia, ib)] + x[(1, p, ib, ia)] for p in P) == 1, f"circle_w1_pair_{ia}_{ib}"
 
-    # (C) Canonical ordering of weeks by a signature: signature_week[w] <= signature_week[w+1]
+    # (C) Canonical ordering of weeks by a weight: weight_week[w] <= weight_week[w+1]
     if 'C' in flags:
-        signature_week = {}
+        weight_week = {}
         for w in W:
-            signature_week[w] = pulp.LpVariable(f"sig_w_{w}", lowBound=0, cat=pulp.LpContinuous)
+            weight_week[w] = pulp.LpVariable(f"sig_w_{w}", lowBound=0, cat=pulp.LpContinuous)
             if version == "i<j":
-                prob += signature_week[w] == pulp.lpSum((i + j) * x[(w,p,i,j)] for (i,j) in pairs for p in P), f"define_sig_w_{w}"
+                prob += weight_week[w] == pulp.lpSum((i + j) * x[(w,p,i,j)] for (i,j) in pairs for p in P), f"define_sig_w_{w}"
             else:
-                prob += signature_week[w] == pulp.lpSum((i + j) * (x[(w,p,i,j)] + x[(w,p,j,i)]) for (i,j) in pairs for p in P), f"define_sig_w_{w}"
+                prob += weight_week[w] == pulp.lpSum((i + j) * (x[(w,p,i,j)] + x[(w,p,j,i)]) for (i,j) in pairs for p in P), f"define_sig_w_{w}"
         for idx in range(len(W) - 1):
             w = W[idx]
             wp = W[idx + 1]
-            prob += signature_week[w] <= signature_week[wp], f"order_weeks_{w}_{wp}"
+            prob += weight_week[w] <= weight_week[wp], f"order_weeks_{w}_{wp}"
 
-    # (D) Canonical ordering of periods globally: signature_period[p] <= signature_period[p+1]
+    # (D) Canonical ordering of periods globally: weight_period[p] <= weight_period[p+1]
     if 'D' in flags:
-        signature_period = {}
+        weight_period = {}
         for p in P:
-            signature_period[p] = pulp.LpVariable(f"sig_p_{p}", lowBound=0, cat=pulp.LpContinuous)
+            weight_period[p] = pulp.LpVariable(f"sig_p_{p}", lowBound=0, cat=pulp.LpContinuous)
             if version == "i<j":
-                prob += signature_period[p] == pulp.lpSum((i + j) * x[(w,p,i,j)] for (i,j) in pairs for w in W), f"define_sig_p_{p}"
+                prob += weight_period[p] == pulp.lpSum((i + j) * x[(w,p,i,j)] for (i,j) in pairs for w in W), f"define_sig_p_{p}"
             else:
-                prob += signature_period[p] == pulp.lpSum((i + j) * (x[(w,p,i,j)] + x[(w,p,j,i)]) for (i,j) in pairs for w in W), f"define_sig_p_{p}"
+                prob += weight_period[p] == pulp.lpSum((i + j) * (x[(w,p,i,j)] + x[(w,p,j,i)]) for (i,j) in pairs for w in W), f"define_sig_p_{p}"
         for idx in range(len(P) - 1):
             p = P[idx]
             pp = P[idx + 1]
-            prob += signature_period[p] <= signature_period[pp], f"order_periods_{p}_{pp}"
+            prob += weight_period[p] <= weight_period[pp], f"order_periods_{p}_{pp}"
 
     # ---------- WARM START HANDLING ----------
     # warm_start parameter accepted values:
@@ -598,14 +598,16 @@ if __name__ == '__main__':
     # simple driver: iterate combinations (nota: passiamo presolve correttamente)
     # seed used ofr tests = 0,1234567,26,42,262626,424242,878641,5656565
     bests = [
-        (14,"CBC","base","feasible",42,True,"","week1",False),
-        (14,"CBC","i<j","balanced",878641,True,"","week1",False),
-        (12,"GLPK","base","feasible",26,True,"B","",False),
-        (10,"GLPK","i<j","balanced",26,True,"A","",True)
+        (8,"CBC","i<j","balanced",878641,True,"","",False),
+        # (14,"CBC","base","feasible",42,True,"","week1",False),
+        # (14,"CBC","i<j","balanced",878641,True,"","week1",False),
+        # (12,"GLPK","base","feasible",26,True,"B","",False),
+        # (10,"GLPK","i<j","balanced",26,True,"A","",True)
         ]
     for n,solver,version,objective,seed,presolve,sym_flags,warm_start,cuts in bests:
-                        for nn in range(4, n+1, 2):
-                                res_dir = os.path.join(os.path.dirname(__file__), "..", "..", "res", "MIP" )
+                        # for nn in range(4, n+1, 2):
+                                nn = n
+                                res_dir = os.path.join(os.path.dirname(__file__), "..", "..", "res", "MIP", "ciao_1" )
                                 os.makedirs(res_dir, exist_ok=True)
                                 out_path = os.path.join(res_dir, f"{nn}.json")
                                 global_start = time.time()

@@ -77,7 +77,7 @@ V123_BESTS = [
 V4_BESTS = [
     # (n_max, solver, objective, presolve, seed, warm_start)
     (16, "CBC", "balanced", True, 424242, "random_half"),
-    (16, "CBC", "feasible", True, 262626, "week1"),
+    (18, "CBC", "feasible", True, 6677618, "week1"),
     (12, "GLPK","balanced", True, 26, ""),
     (14, "GLPK","feasible", True, 26, ""),
 ]
@@ -452,6 +452,9 @@ def run_v4_batch(module_v4):
     """
     for n_max, solver, objective, presolve, seed, warm_start in V4_BESTS:
         for nn in range(4, n_max + 1, 2):
+            if nn == 16 and objective == "feasible" and solver == "CBC":
+                # (16, "CBC", "feasible", True, 262626, "week1")
+                seed = 262626  # override as per your snippet
             res_dir = os.path.join(HERE, "..", "..", "res", "MIP")
             os.makedirs(res_dir, exist_ok=True)
             out_path = os.path.join(res_dir, f"{nn}.json")

@@ -21,6 +21,7 @@ from collections import defaultdict
 def balanced_circle_method_pairs(n: int) -> Dict[int, List[Tuple[int,int]]]:
     """Return oriented pairs (home,away) for each week using circle method."""
     assert n % 2 == 0 and n >= 4
+    print(f"[INFO] Preprocessing pairs via balanced circle method for n={n} teams.")
     w = n - 1
     p = n // 2
     fixed = 1
@@ -36,6 +37,7 @@ def balanced_circle_method_pairs(n: int) -> Dict[int, List[Tuple[int,int]]]:
                 pairs.append((arr[id_p], arr[-1 - id_p]))
         schedule[wk] = pairs
         others = [others[-1]] + others[:-1]
+    print(f"[INFO] Preprocessing done.")
     return schedule
 
 def check_warmstart_feasibility_using_initials(prob, tol=1e-6, DEBUG=False):
@@ -131,26 +133,28 @@ def build_model_with_permutations(n: int,
         # d[t] continuous >= 0 linearize |home_minus_away[t]|
         d = pulp.LpVariable.dicts("imbalance", T, lowBound=0, cat=pulp.LpContinuous)
 
-    # (A) Assign each pair k in week w to exactly one period
-    for w in W:
-        for k in range(p):
-            prob += pulp.lpSum(y[(w,k,per)] for per in P) == 1, f"assign_once_w{w}_k{k}"
-
-    # (B) Permutation: each period per in week w has exactly one pair
+    # (A) Permutation: each period per in week w has exactly one pair 
     for w in W:
         for per in P:
             prob += pulp.lpSum(y[(w,k,per)] for k in range(p)) == 1, f"one_pair_per_period_w{w}_per{per}"
 
-    # (C) Global cap: each team t appears in period per at most twice
+    # (B) Assign each pair k in week w to exactly one period
+    for w in W:
+        for k in range(p):
+            prob += pulp.lpSum(y[(w,k,per)] for per in P) == 1, f"assign_once_w{w}_k{k}"
+
+    # (C) Global cap: each team t appears in period per at most twice (fourth in the paper)
     for t in T:
         for per in P:
             vars_involved = [ y[(w,k,per)] for (w,k) in appearance_map[t] ]
             if vars_involved:
                 prob += pulp.lpSum(vars_involved) <= 2, f"period_cap_team{t}_per{per}"
     # (E) Symmetry breaking: anchor partial week1
-    for k in range(p//3):
-        if k % 2 == 0:
-            prob += y[(1, k, k+1)] == 1, f"fix_week1_identity_k{k}"
+    # for k in range(p//3):
+    #     if k % 2 == 0:
+    #         prob += y[(1, k, k+1)] == 1, f"fix_week1_identity_k{k}"
+    # (F) Symmetry breaking: fix first pair of first week and first period
+    prob += y[(1, 0, 1)] == 1, "fix_first_pair_week1_period1"
 
     # If balanced: link h and y and define home_minus_away[t]
     if objective == "balanced":
@@ -164,7 +168,7 @@ def build_model_with_permutations(n: int,
         home_minus_away = {}
         for t in T:
             home_terms = []
-            away_terms = []
+            # away_terms = []
             for (w,k) in appearance_map[t]:
                 # pair = pairs_list_by_week[w][k] is (a,b) with a<b or not — we treat 'first' element as index 0
                 a,b = pairs_list_by_week[w][k]
@@ -172,24 +176,38 @@ def build_model_with_permutations(n: int,
                     # if t is the first element in stored pair: home contribution is h, away is y-h
                     for per in P:
                         home_terms.append(h[(w,k,per)])
-                        away_terms.append(y[(w,k,per)] - h[(w,k,per)])
+                        # away_terms.append(y[(w,k,per)] - h[(w,k,per)])
                 else:
                     # t == b: home contribution is y-h, away contribution is h
                     for per in P:
                         home_terms.append(y[(w,k,per)] - h[(w,k,per)])
-                        away_terms.append(h[(w,k,per)])
+                        # away_terms.append(h[(w,k,per)])
             if home_terms:
-                home_minus_away[t] = pulp.lpSum(home_terms) - pulp.lpSum(away_terms)
+                home_minus_away[t] = 2 * pulp.lpSum(home_terms) - (n-1)# - pulp.lpSum(away_terms)
             else:
                 home_minus_away[t] = 0
 
-        # linearize absolute value: -d[t] <= home_minus_away[t] <= d[t]
+        # linearize absolute value: -d[t] <= home_minus_away[t] - 1 <= d[t]
         for t in T:
-            prob += home_minus_away[t] <= 1+d[t], f"imb_pos_{t}"
-            prob += -home_minus_away[t] <= 1+d[t], f"imb_neg_{t}"
+            prob += home_minus_away[t] <= 1 + d[t], f"imb_pos_{t}"
+            prob += -home_minus_away[t] <= 1 + d[t], f"imb_neg_{t}"
+
+        # Try to enforce a minimum imbalance of 1 per team when obj is not zero
+        # for t in T:
+        #     prob += d[t] >= 1, f"min_imbalance_lowerbound_{t}"
 
         # objective: minimize total imbalance
         prob += pulp.lpSum(d[t] for t in T), "min_total_imbalance"
+
+        # # z rappresenta il massimo tra tutti i d[t]
+        # z = pulp.LpVariable("z", lowBound=0, cat="Continuous")
+
+        # # vincoli: z >= d[t] per tutti t
+        # for t in T:
+        #     prob += z >= d[t], f"z_ge_d_{t}"
+
+        # # obiettivo: minimizzare z
+        # prob += z, "min_max_imbalance"
 
     # -------------------------
     # Warm start: set initial values for y (and h if present)
@@ -347,16 +365,22 @@ def build_model_with_permutations(n: int,
 if __name__ == '__main__':
     # simple driver: iterate combinations (nota: passiamo presolve correttamente)
     # seed used ofr tests = 0,1234567,26,42,262626,424242,878641,5656565
+    SEEDS = [  0,1234567,26,42,262626,424242,878641,565656,24494897 ]
+    # SEEDS = SEEDS[:5]  # limit for quicker tests
     bests = [
-        (18, "CBC", "balanced", True, 424242, "random_half"),
-        (18,"CBC","feasible",True,262626,"week1"),
+        (18, "CBC", "feasible", True, 24494897, "week1"),
+        (18, "CBC", "feasible", True, 6677618, "week1"),
+        # (18,"CBC","feasible",True,262626,"week1"),
         # (12,"GLPK","balanced",True,26,""),
         # (12,"GLPK","feasible",True,26,"")
+        # CBC_prepro_anchor_feasible_week1_6677618 n = 18  "time": 1,
+        # CBC_prepro_anchor_feasible_week1_24494897 n = 18  "time": 182
     ]
-    for n,solver, objective, presolve, seed, warm_start in bests:
-                            # for nn in range(4, n+1, 2):
+    # for seed in SEEDS:
+    for n in [14,16]:
+            for _ ,solver, objective, presolve, seed, warm_start in bests:
                                 nn = n
-                                res_dir = os.path.join(os.path.dirname(__file__), "..", "..", "res", "MIP", "ciao_2")
+                                res_dir = os.path.join(os.path.dirname(__file__), "..", "..", "res", "MIP", "ciao_5")
                                 os.makedirs(res_dir, exist_ok=True)
                                 out_path = os.path.join(res_dir, f"{nn}.json")
                                 global_start = time.time()
