@@ -365,22 +365,26 @@ def build_model_with_permutations(n: int,
 if __name__ == '__main__':
     # simple driver: iterate combinations (nota: passiamo presolve correttamente)
     # seed used ofr tests = 0,1234567,26,42,262626,424242,878641,5656565
-    SEEDS = [  0,1234567,26,42,262626,424242,878641,565656,24494897 ]
-    # SEEDS = SEEDS[:5]  # limit for quicker tests
+    SEEDS = [ 
+        26, 42, 262626, 424242, 69, 878641, 1234567, 5656565, 9999999, 20240624, 31415926, 27182818
+    ]
+    SEEDS = SEEDS[:5]  # limit for quicker tests
     bests = [
+        # (14, "CBC", "balanced", True, 274721127, "random_half"),
+        # (16, "CBC", "balanced", True, 424242, "random_half"),
         (18, "CBC", "feasible", True, 24494897, "week1"),
-        (18, "CBC", "feasible", True, 6677618, "week1"),
         # (18,"CBC","feasible",True,262626,"week1"),
-        # (12,"GLPK","balanced",True,26,""),
-        # (12,"GLPK","feasible",True,26,"")
+        # (14, "GLPK","balanced", True, 26, ""),
+        # (16, "GLPK","feasible", True, 26, ""),
         # CBC_prepro_anchor_feasible_week1_6677618 n = 18  "time": 1,
         # CBC_prepro_anchor_feasible_week1_24494897 n = 18  "time": 182
     ]
     # for seed in SEEDS:
-    for n in [14,16]:
-            for _ ,solver, objective, presolve, seed, warm_start in bests:
+    # for n in [14]:
+    for n ,solver, objective, presolve, seed, warm_start in bests:
+        # for i in range(10,n+1,2):
                                 nn = n
-                                res_dir = os.path.join(os.path.dirname(__file__), "..", "..", "res", "MIP", "ciao_5")
+                                res_dir = os.path.join(os.path.dirname(__file__), "..", "..", "res", "MIP")#,"temp", "ciao_8"
                                 os.makedirs(res_dir, exist_ok=True)
                                 out_path = os.path.join(res_dir, f"{nn}.json")
                                 global_start = time.time()

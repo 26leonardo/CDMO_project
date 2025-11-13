@@ -74,14 +74,6 @@ V123_BESTS = [
     (10, "GLPK","i<j",   "balanced", 26, True,  "A",     "",      True),
 ]
 
-V4_BESTS = [
-    # (n_max, solver, objective, presolve, seed, warm_start)
-    (16, "CBC", "balanced", True, 424242, "random_half"),
-    (18, "CBC", "feasible", True, 6677618, "week1"),
-    (12, "GLPK","balanced", True, 26, ""),
-    (14, "GLPK","feasible", True, 26, ""),
-]
-
 
 # ---- Core runner functions ---------------------------------------------------
 def run_v123_batch(module_v123):
@@ -443,7 +435,13 @@ def run_v6_single(n, module_v123, module_v4):
                 traceback.print_exc()
 
 
-
+V4_BESTS = [
+    # (n_max, solver, objective, presolve, seed, warm_start)
+    (16, "CBC", "balanced", True, 328211356, "random_half"),
+    (18, "CBC", "feasible", True, 26, "week1"),
+    (12, "GLPK","balanced", True, 26, ""),
+    (14, "GLPK","feasible", True, 26, ""),
+]
 
 def run_v4_batch(module_v4):
     """
@@ -452,9 +450,9 @@ def run_v4_batch(module_v4):
     """
     for n_max, solver, objective, presolve, seed, warm_start in V4_BESTS:
         for nn in range(4, n_max + 1, 2):
-            if nn == 16 and objective == "feasible" and solver == "CBC":
-                # (16, "CBC", "feasible", True, 262626, "week1")
-                seed = 262626  # override as per your snippet
+            if nn == 18 and objective == "feasible" and solver == "CBC":
+                # (18, "CBC", "feasible", True, 24494897, "week1")
+                seed = 24494897  # override as per your snippet
             res_dir = os.path.join(HERE, "..", "..", "res", "MIP")
             os.makedirs(res_dir, exist_ok=True)
             out_path = os.path.join(res_dir, f"{nn}.json")
