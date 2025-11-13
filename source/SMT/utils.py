@@ -1,7 +1,31 @@
 import json, time, subprocess, re
-from z3 import *
+#from z3 import *
 from collections import defaultdict
 import shutil
+import os
+
+def build_sol(model, N, Per, Home):
+    W = N - 1
+    P = N // 2
+
+    # Extract values from the model
+    Per_values = [[int(model.get_value(Per[t][w]).constant_value()) for w in range(W)] for t in range(N)]
+    Home_values = [[model.get_value(Home[t][w]).is_true() for w in range(W)] for t in range(N)]
+    # Initialize P x W table: each cell is [home_team, away_team]
+    sol = [[[0,0] for _ in range(W)] for _ in range(P)]
+
+    for t in range(N):
+        for w in range(W):
+            p = Per_values[t][w] - 1  # period index (0-based)
+            h = Home_values[t][w]
+            if h:
+                sol[p][w][0]=t+1
+            else:
+                sol[p][w][1]=t+1
+
+    return sol
+
+
 
 def build_solution_table(opp, hom, per, N, W, P):
     """
@@ -62,7 +86,7 @@ def z3_to_int_grid(m, Z):
 def z3_to_bool_grid(m, Z):
     """Evaluate a 2D array of Bool Z3 vars -> Python bools."""
     T, W_ = len(Z), len(Z[0])
-    out = [[is_true(m.evaluate(Z[t][w])) for w in range(W_)] for t in range(T)]
+    out = [[m.evaluate(Z[t][w]) for w in range(W_)] for t in range(T)]
     return out
 
 
@@ -102,6 +126,7 @@ GET_VAL_PAIR_RE = re.compile(
     r"\s*\(\s*([A-Za-z0-9_]+)\s+(true|false|-?\d+)\s*\)",
     re.I
 )
+
 
 def parse_model(stdout: str) -> dict:
     """
@@ -202,7 +227,7 @@ def build_sol_from_opp_home(T, W, P, Opp, Home, Per=None):
     return sol
 
 # ---------- solver runner ----------
-def run_solver(smt_path, solver, timeout_s, seed):
+def run_solver(smt_path, solver, timeout_s, seed, phase_sel=5):
     """
     Run SMT solver with optimized configuration and robust error handling.
     
@@ -216,19 +241,22 @@ def run_solver(smt_path, solver, timeout_s, seed):
     if "z3" in solver_name:
         cmd = [
     solver, "-smt2", smt_path,
-    "smt.phase_selection=4",
+    f"smt.phase_selection={phase_sel}", '-model', 
        f'smt.random_seed={seed}'  # Disable flattening that can vary
 ]
     
     elif "cvc5" in solver_name:
         cmd = [
-            solver, "--lang=smt2", smt_path,
-            "--decision=internal",
-            "--produce-models",
-            f'--random-seed={seed}'
+            solver, "--lang=smt2", '--produce-model',
+            f'--sat-random-seed={seed}',f'--seed={seed}','--decision=internal',
+            smt_path
         ]
+    elif 'math' in solver_name:
+        cmd=['mathsat', '-model',smt_path]
+    
     elif 'opti' in solver_name:
-        cmd=['optimathsat-1.7.3-macos-64-bit/bin/optimathsat', smt_path]
+        cmd=['optimathsat','-model',#f'-random_seed={seed}',
+             smt_path ]
     
     # Enhanced process execution
     start_time = time.time()

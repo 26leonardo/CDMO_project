@@ -1,7 +1,7 @@
 import argparse, tempfile
 from utils import *
-from models import *
-import os
+from models2 import *
+
 
 def main():
     # define the arguments of the parser
@@ -24,29 +24,32 @@ def main():
         approach = f'{args.solver}_{args.approach}_opt'
     else:
         approach = f'{args.solver}_{args.approach}'
+    if args.solver=='z3' and N<=14:
+        phase=4
+    elif args.solver=='z3' and N>14:
+        phase=5
+    else:
+        phase=None
 
     # define the channeled approach
     if args.approach == 'channeled':
         start=time.time()
-        write_smtlib(s, 'io.smt2')
-        with open('io.smt2', "a") as f:
-            f.write("(get-model)\n")
-
-        # Run the solver
-        diff=time.time()-start
-        stdout, stderr, elapsed = run_solver('io.smt2', args.solver, args.timeout-diff3, seed=seed)
-
-        # Delete the file after use
-        os.remove('io.smt2')
-        status=get_status(stdout)
+        s, Per, Home, Opp = channeled_model_no_check(N)
+        s = symmetry_breaking_constraints(N, s, Home, Per, Opp)
+        smt = s.to_smt2()
         
-        if status=='timeout' or status in ('unknown', 'unsat'):
-            solved = 0
-        else:
-            solved = 1
 
-        total_time+=diff+elapsed
-
+        with tempfile.NamedTemporaryFile("w", suffix=".smt2", delete=False) as f:
+            f.write(f"(set-logic QF_LIA)\n(set-option :produce-models true)\n(set-option :timeout 300000)\n(set-option :random-seed {seed})\n")
+            #f.write("(set-option :dpll.branching_cache_phase 2)\n(set-option :dpll.branching_initial_phase 2)\n(set-option :dpll.branching_random_frequency 0.0)\n")
+            f.write(smt)
+            f.write("(get-model)\n")
+            f.flush()
+            end=time.time()-start
+            total_time+=end
+            stdout, stderr, elapsed = run_solver(f.name, args.solver, args.timeout-total_time, seed=seed, phase_sel=phase)
+            tmp_path = f.name
+        os.remove(tmp_path)
 
         status=get_status(stdout)
         if status=='timeout' or (status in ('unknown', 'unsat') ):
@@ -70,17 +73,26 @@ def main():
         if opt in ['true', 'True']:
             while solved != 0 and not (status=='timeout' or status in ('unknown', 'unsat') ):
                 sol1, sol2 = stdout, stderr
-                start2=time.time()
+                start3=time.time()
+                mid=obj//2
                 s, Per, Home, Opp = channeled_model_no_check(N)
-                write_smtlib(s, 'io.smt2')
-                with open('io.smt2', "a") as f:
-                    f.write("(get-model)\n")
+                s, Home = smt_obj_manual(N, Home, mid, counts, s)
+                s = symmetry_breaking_constraints(N, s, Home, Per, Opp)
+                smt = s.to_smt2()
 
-                # Run the solver
-                diff2=time.time()-start2
-                total_time+=diff2
-                stdout, stderr, elapsed4 = run_solver('io.smt2', args.solver, args.timeout-total_time, seed=seed)
-                total_time += elapsed4+diff4
+
+                with tempfile.NamedTemporaryFile("w", suffix=".smt2", delete=False) as f:
+                    f.write(f"(set-logic QF_LIA)\n(set-option :produce-models true)\n(set-option :timeout 300000)\n(set-option :random-seed {seed})\n")
+                    f.write("(set-option :dpll.branching_cache_phase 2)\n(set-option :dpll.branching_initial_phase 2)\n(set-option :dpll.branching_random_frequency 0.0)\n" \
+                    "(set-option :produce-models true) \n (set-option :auto-config false) \n (set-option :sat.cardinality.encoding ordered) \n (set-option :arith.branch_cut_ratio 1)")
+                    f.write(smt)
+                    f.write("(get-model)\n")
+                    f.flush() 
+                    end3=time.time()-start3
+                    total_time+=end3
+                    stdout, stderr, elapsed3 = run_solver(f.name, args.solver, args.timeout - total_time, seed=seed, phase_sel=phase) 
+                    os.remove(f.name)
+                total_time += elapsed3
 
                 assigns = parse_model(stdout)
                 if not assigns:
@@ -90,30 +102,45 @@ def main():
                 Home = read_grid(assigns, "Home", T, W, default=False)
                 counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
                 obj = int(sum(abs(2 * c - W) for c in counts))
+                obj-=N
                 status=get_status(stdout)
                 print(counts)
 
 
+
     elif args.approach == 'preprocess':
         start3=time.time()
-        s, Home, Per = preprocess_approach_domains(N)
-        write_smtlib(s, 'source/io.smt2')
-        with open('source/io.smt2', "a") as f:
+        s, Home, Per, matches = preprocess_approach_domains(N)
+        s = symmetry_breaking_constraints_preprocess(N, s, Home, Per, matches)
+        smt = s.to_smt2()
+        
+
+        with tempfile.NamedTemporaryFile("w", suffix=".smt2", delete=False) as f:
+            f.write(f"(set-logic QF_LIA)\n(set-option :produce-models true)\n(set-option :timeout 300000)\n(set-option :random-seed {seed})\n")
+            #f.write("(set-option :dpll.branching_cache_phase 2)\n(set-option :dpll.branching_initial_phase 2)\n(set-option :dpll.branching_random_frequency 0.0)\n")
+            f.write(smt)
             f.write("(get-model)\n")
+            f.flush()
+            end3=time.time()-start3
+            total_time+=end3
+            stdout, stderr, elapsed3 = run_solver(f.name, args.solver, args.timeout-total_time, seed=seed, phase_sel=phase)
+            tmp_path = f.name
+        os.remove(tmp_path)
 
-        # Run the solver
-        diff3=time.time()-start3
-        stdout, stderr, elapsed = run_solver('source/io.smt2', args.solver, args.timeout-diff3, seed=seed)
+        with open("source/schedule.smt2", "w") as f:
+            f.write(f"(set-logic QF_LIA)\n(set-option :produce-models true)\n(set-option :timeout 300000)\n(set-option :random-seed {seed})\n")
+            #f.write("(set-option :dpll.branching_cache_phase 2)\n(set-option :dpll.branching_initial_phase 2)\n(set-option :dpll.branching_random_frequency 0.0)\n")
+            f.write(smt)
+            f.write("(get-model)\n")
+            tmp_path = f.name
 
-        # Delete the file after use
-        os.remove('source/io.smt2')
         status=get_status(stdout)
-        if status=='timeout' or status in ('unknown', 'unsat'):
+        if status=='timeout' or status in ('unknown', 'unsat')  :
             solved = 0
         else:
             solved = 1
 
-        total_time+=diff3+elapsed
+        total_time+=elapsed3+end3
 
         if solved != 0:
             assigns = parse_model(stdout)
@@ -121,6 +148,7 @@ def main():
             Home = read_grid(assigns, "Home", T, W, default=False)
             counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
             obj = int(sum(abs(2 * c - W) for c in counts))
+            #obj-=N
             
             print(counts)
         else:
@@ -133,18 +161,25 @@ def main():
                 sol1, sol2 = stdout, stderr
                 start4=time.time()
                 mid=(obj+N)//2
-                s, Home, Per = preprocess_approach_domains_opt(N, counts, mid)
-                write_smtlib(s, 'source/io.smt2')
-                with open('source/io.smt2', "a") as f:
+                s, Home, Per, matches = preprocess_approach_domains(N)
+                s, Home = smt_obj_manual(N, Home, mid, counts, s)
+                s = symmetry_breaking_constraints_preprocess(N, s, Home, Per, matches)
+                smt = s.to_smt2()
+
+
+                with tempfile.NamedTemporaryFile("w", suffix=".smt2", delete=False) as f:
+                    f.write(f"(set-logic QF_LIA)\n(set-option :produce-models true)\n(set-option :timeout 300000)\n(set-option :random-seed {seed})\n")
+                    #f.write("(set-option :dpll.branching_cache_phase 2)\n(set-option :dpll.branching_initial_phase 2)\n(set-option :dpll.branching_random_frequency 0.0)\n" \
+                    #"(set-option :produce-models true) \n (set-option :auto-config false) \n (set-option :sat.cardinality.encoding ordered) \n (set-option :arith.branch_cut_ratio 1)")
+                    f.write(smt)
                     f.write("(get-model)\n")
+                    f.flush() 
+                    end4=time.time()-start4
+                    total_time+=end4
+                    stdout, stderr, elapsed4 = run_solver(f.name, args.solver, args.timeout - total_time, seed=seed, phase_sel=phase) 
+                    os.remove(f.name)
+                total_time += elapsed4
 
-                # Run the solver
-                diff4=time.time()-start4
-                total_time+=diff4
-                stdout, stderr, elapsed4 = run_solver('source/io.smt2', args.solver, args.timeout-total_time, seed=seed)
-                total_time += elapsed4+diff4
-
-                os.remove('source/io.smt2')
                 assigns = parse_model(stdout)
                 if not assigns:
                     status=get_status(stdout)
@@ -153,7 +188,9 @@ def main():
                 Home = read_grid(assigns, "Home", T, W, default=False)
                 counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
                 obj = int(sum(abs(2 * c - W) for c in counts))
+                #obj-=N
                 status=get_status(stdout)
+                print(counts)
 
     
     if status=='timeout' and solved==0:
@@ -192,10 +229,10 @@ def main():
         Opp=None
 
 
-    #if not assigns:
-    #    print(sol1)
-    #    print(sol2, file=sys.stderr)
-    #    raise SystemExit("Could not parse any variable assignments. Ensure the file does (get-model) or (get-value ...).")
+    if not assigns:
+        print(sol1)
+        print(sol2, file=sys.stderr)
+        raise SystemExit("Could not parse any variable assignments. Ensure the file does (get-model) or (get-value ...).")
 
     # Reconstruct solution
     try:
@@ -218,6 +255,7 @@ def main():
     # Objective: sum_t |2*home_t - W|
     counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
     obj = int(sum(abs(2*c - W) for c in counts))
+    #obj-=N
 
     # Merge/update JSON
     os.makedirs(args.outdir, exist_ok=True)

@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PuLP and numpy
-RUN pip install --no-cache-dir pulp numpy z3-solver
+RUN pip install --no-cache-dir pulp numpy z3-solver PySMT
 
 # Install cvc5 - download binary from release page
 # Install cvc5 - choose binary matching container architecture, fallback if needed
