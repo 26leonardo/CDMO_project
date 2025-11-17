@@ -24,6 +24,7 @@ def main():
         approach = f'{args.solver}_{args.approach}_opt'
     else:
         approach = f'{args.solver}_{args.approach}'
+        
     if args.solver=='z3' and N<=14:
         phase=4
     elif args.solver=='z3' and N>14:
@@ -126,14 +127,6 @@ def main():
             stdout, stderr, elapsed3 = run_solver(f.name, args.solver, args.timeout-total_time, seed=seed, phase_sel=phase)
             tmp_path = f.name
         os.remove(tmp_path)
-
-        with open("source/schedule.smt2", "w") as f:
-            f.write(f"(set-logic QF_LIA)\n(set-option :produce-models true)\n(set-option :timeout 300000)\n(set-option :random-seed {seed})\n")
-            #f.write("(set-option :dpll.branching_cache_phase 2)\n(set-option :dpll.branching_initial_phase 2)\n(set-option :dpll.branching_random_frequency 0.0)\n")
-            f.write(smt)
-            f.write("(get-model)\n")
-            tmp_path = f.name
-
         status=get_status(stdout)
         if status=='timeout' or status in ('unknown', 'unsat')  :
             solved = 0

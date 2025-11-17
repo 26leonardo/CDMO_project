@@ -59,11 +59,11 @@ def channeled_model_no_check(N):
         a, b = p, N + 1 - p
         constraints.append(Equals(Per[a-1][0], Int(p)))
         constraints.append(Equals(Per[b-1][0], Int(p)))
-    
+    #
     # fix team 1 opponents in decreasing order
     for w in range(W-1):
         constraints.append(GT(Opp[0][w], Opp[0][w+1]))
-
+#
     formula=And(constraints)
 
     return formula, Per, Home

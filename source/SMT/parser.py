@@ -28,13 +28,16 @@ def main():
     # define the channeled approach
     if args.approach == 'channeled':
         start=time.time()
+        s, Per, Home = channeled_model_no_check(N)
+        s=s.simplify()
         write_smtlib(s, 'io.smt2')
         with open('io.smt2', "a") as f:
             f.write("(get-model)\n")
 
         # Run the solver
         diff=time.time()-start
-        stdout, stderr, elapsed = run_solver('io.smt2', args.solver, args.timeout-diff3, seed=seed)
+
+        stdout, stderr, elapsed = run_solver('io.smt2', args.solver, args.timeout-diff, seed=seed)
 
         # Delete the file after use
         os.remove('io.smt2')
@@ -71,7 +74,9 @@ def main():
             while solved != 0 and not (status=='timeout' or status in ('unknown', 'unsat') ):
                 sol1, sol2 = stdout, stderr
                 start2=time.time()
-                s, Per, Home, Opp = channeled_model_no_check(N)
+                mid=(obj+N)//2
+                s, Per, Home, Opp = channeled_model_no_check_opt(N, counts, mid)
+                s=s.simplify()
                 write_smtlib(s, 'io.smt2')
                 with open('io.smt2', "a") as f:
                     f.write("(get-model)\n")
@@ -98,6 +103,7 @@ def main():
         start3=time.time()
         s, Home, Per = preprocess_approach_domains(N)
         write_smtlib(s, 'source/io.smt2')
+        s=s.simplify()
         with open('source/io.smt2', "a") as f:
             f.write("(get-model)\n")
 
@@ -134,6 +140,7 @@ def main():
                 start4=time.time()
                 mid=(obj+N)//2
                 s, Home, Per = preprocess_approach_domains_opt(N, counts, mid)
+                s=s.simplify()
                 write_smtlib(s, 'source/io.smt2')
                 with open('source/io.smt2', "a") as f:
                     f.write("(get-model)\n")
@@ -154,6 +161,7 @@ def main():
                 counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
                 obj = int(sum(abs(2 * c - W) for c in counts))
                 status=get_status(stdout)
+                print(counts)
 
     
     if status=='timeout' and solved==0:

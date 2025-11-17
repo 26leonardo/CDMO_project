@@ -48,16 +48,16 @@ def symmetry_breaking_constraints(N, solver, Home, Per, Opp):
     P = N // 2
     
     # Break global home/away flip
-    solver.add(Home[0][0])
+    #solver.add(Home[0][0])
 
     # Break the flip of the opponents
     solver.add(Opp[0][0] == N)
     
     # Fix week 0 layout period
-    for p in range(1, P+1):
-        a, b = p, N + 1 - p
-        solver.add(Per[a-1][0] == p)
-        solver.add(Per[b-1][0] == p)
+    #for p in range(1, P+1):
+    #    a, b = p, N + 1 - p
+    #    solver.add(Per[a-1][0] == p)
+    #    solver.add(Per[b-1][0] == p)
     
     # fix team 1 opponents in decreasing order
     for w in range(W-1):
@@ -71,7 +71,7 @@ def smt_obj_manual(N, Home, obj, counts, solver):
     
     # count the number of home games
     count_home = [Sum([If(Home[t][w], 1, 0) for w in range(W)]) for t in range(N)]
-    
+
     for t in range(N):
         # implied constraint to make the home games converge faster
         solver.add(count_home[t]<=max(counts))
