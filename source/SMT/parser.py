@@ -20,44 +20,36 @@ def main():
     total_time=0
     opt=args.optimize
     seed=args.seed
+    phase_sel=4
     if opt in ['true', 'True']:
-        approach = f'{args.solver}_{args.approach}_opt'
+        approach = f'py_{args.solver}_{args.approach}_opt'
     else:
-        approach = f'{args.solver}_{args.approach}'
+        approach = f'py_{args.solver}_{args.approach}'
 
     # define the channeled approach
     if args.approach == 'channeled':
         start=time.time()
         s, Per, Home = channeled_model_no_check(N)
         s=s.simplify()
-        write_smtlib(s, 'io.smt2')
-        with open('io.smt2', "a") as f:
+        write_smtlib(s, f'source/{approach}_{N}.smt2')
+        with open(f'source/{approach}_{N}.smt2', "a") as f:
             f.write("(get-model)\n")
 
         # Run the solver
         diff=time.time()-start
-
-        stdout, stderr, elapsed = run_solver('io.smt2', args.solver, args.timeout-diff, seed=seed)
-
+        total_time+=int(diff)
+        print(total_time)
+        stdout, stderr, elapsed = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=4)
         # Delete the file after use
-        os.remove('io.smt2')
+        os.remove(f'source/{approach}_{N}.smt2')
+        total_time+=int(elapsed)
         status=get_status(stdout)
-        
+        print(elapsed)
         if status=='timeout' or status in ('unknown', 'unsat'):
             solved = 0
         else:
             solved = 1
-
-        total_time+=diff+elapsed
-
-
-        status=get_status(stdout)
-        if status=='timeout' or (status in ('unknown', 'unsat') ):
-            solved = 0
-        else:
-            solved = 1
-        
-        total_time += elapsed
+        print(total_time)
 
         if solved != 0:
             assigns = parse_model(stdout)
@@ -75,17 +67,18 @@ def main():
                 sol1, sol2 = stdout, stderr
                 start2=time.time()
                 mid=(obj+N)//2
-                s, Per, Home, Opp = channeled_model_no_check_opt(N, counts, mid)
+                s, Per, Home = channeled_model_no_check_opt(N, counts, mid)
                 s=s.simplify()
-                write_smtlib(s, 'io.smt2')
-                with open('io.smt2', "a") as f:
+                write_smtlib(s, f'source/{approach}_{N}.smt2')
+                with open(f'source/{approach}_{N}.smt2', "a") as f:
                     f.write("(get-model)\n")
 
                 # Run the solver
                 diff2=time.time()-start2
-                total_time+=diff2
-                stdout, stderr, elapsed4 = run_solver('io.smt2', args.solver, args.timeout-total_time, seed=seed)
-                total_time += elapsed4+diff4
+                total_time+=int(diff2)
+                stdout, stderr, elapsed4 = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=4)
+                os.remove(f'source/{approach}_{N}.smt2')
+                total_time += int(elapsed4)
 
                 assigns = parse_model(stdout)
                 if not assigns:
@@ -102,24 +95,25 @@ def main():
     elif args.approach == 'preprocess':
         start3=time.time()
         s, Home, Per = preprocess_approach_domains(N)
-        write_smtlib(s, 'source/io.smt2')
+        write_smtlib(s, f'source/{approach}_{N}.smt2')
         s=s.simplify()
-        with open('source/io.smt2', "a") as f:
+        with open(f'source/{approach}_{N}.smt2', "a") as f:
             f.write("(get-model)\n")
 
         # Run the solver
         diff3=time.time()-start3
-        stdout, stderr, elapsed = run_solver('source/io.smt2', args.solver, args.timeout-diff3, seed=seed)
+        total_time+=int(diff3)
+        stdout, stderr, elapsed = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=phase_sel)
 
         # Delete the file after use
-        os.remove('source/io.smt2')
+        os.remove(f'source/{approach}_{N}.smt2')
         status=get_status(stdout)
         if status=='timeout' or status in ('unknown', 'unsat'):
             solved = 0
         else:
             solved = 1
 
-        total_time+=diff3+elapsed
+        total_time+=int(elapsed)
 
         if solved != 0:
             assigns = parse_model(stdout)
@@ -141,17 +135,17 @@ def main():
                 mid=(obj+N)//2
                 s, Home, Per = preprocess_approach_domains_opt(N, counts, mid)
                 s=s.simplify()
-                write_smtlib(s, 'source/io.smt2')
-                with open('source/io.smt2', "a") as f:
+                write_smtlib(s, f'source/{approach}_{N}.smt2')
+                with open(f'source/{approach}_{N}.smt2', "a") as f:
                     f.write("(get-model)\n")
 
                 # Run the solver
                 diff4=time.time()-start4
-                total_time+=diff4
-                stdout, stderr, elapsed4 = run_solver('source/io.smt2', args.solver, args.timeout-total_time, seed=seed)
-                total_time += elapsed4+diff4
+                total_time+=int(diff4)
+                stdout, stderr, elapsed4 = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed,phase_sel=phase_sel)
+                total_time += int(elapsed4)
 
-                os.remove('source/io.smt2')
+                os.remove(f'source/{approach}_{N}.smt2')
                 assigns = parse_model(stdout)
                 if not assigns:
                     status=get_status(stdout)

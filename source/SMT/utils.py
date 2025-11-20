@@ -255,7 +255,7 @@ def run_solver(smt_path, solver, timeout_s, seed, phase_sel=5):
         cmd=['mathsat', '-model',smt_path]
     
     elif 'opti' in solver_name:
-        cmd=['optimathsat','-model',#f'-random_seed={seed}',
+        cmd=['optimathsat','-model',f'-random_seed={seed}',
              smt_path ]
     
     # Enhanced process execution

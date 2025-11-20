@@ -160,6 +160,5 @@ def symmetry_breaking_constraints_preprocess(N, solver, Home, Per, matches):
     for i, (u, v) in enumerate(matches[0], start=1):
         solver.add(Per[u-1][0] == i)
         solver.add(Per[v-1][0] == i)
-    
 
     return solver

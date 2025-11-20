@@ -94,16 +94,17 @@ def channeled_model_no_check_opt(N, counts, obj):
             if t == k: continue
             for w in range(W):
                 constraints.append(
-                    And(Implies(Equals(Opp[t][w], Int(k + 1)),
-                              Equals(And(Per[t][w], Per[k][w]), Equals(Opp[k][w], Int(t + 1)))),
-                Implies(And(Equals(Per[t][w], Per[k][w]), Equals(Opp[k][w], Int(t + 1))),
-                              Equals(Opp[t][w], Int(k + 1))),
-                Implies(Equals(Opp[t][w], Int(k + 1)), Not(Iff(Home[t][w], Home[k][w])))))
+                    And(
+                Implies(Equals(Opp[t][w], Int(k + 1)), And(Equals(Per[t][w], Per[k][w]), Equals(Opp[k][w], Int(t + 1)))),
+                Implies(And(Equals(Per[t][w], Per[k][w]), Equals(Opp[k][w], Int(t + 1))), Equals(Opp[t][w], Int(k + 1))),
+                Implies(Equals(Opp[t][w], Int(k + 1)), Xor(Home[t][w], Home[k][w]))
+                )
+                )
 
 
     # Main constraints
     for t in range(N):
-        constraints.append(And([NotEquals(Opp[t][w],Opp[t][w-1]) for w in range(1,W)]))
+        constraints.append(AllDifferent(*[Opp[t][w] for w in range(W)]))
     
     for w in range(W):
         for p in range(1, P+1):
@@ -142,46 +143,6 @@ def channeled_model_no_check_opt(N, counts, obj):
     formula=And(constraints)
 
     return formula, Home, Per
-
-#def symmetry_breaking_constraints(N, constraints, Home, Per, Opp):
-#    W = N - 1
-#    P = N // 2
-#    
-#    # Break global home/away flip
-#    constraints.append(Home[0][0])
-#
-#    # Break the flip of the opponents
-#    constraints.append(Opp[0][0] == N)
-#    
-#    # Fix week 0 layout period
-#    for p in range(1, P+1):
-#        a, b = p, N + 1 - p
-#        constraints.append(Per[a-1][0] == p)
-#        constraints.append(Per[b-1][0] == p)
-#    
-#    # fix team 1 opponents in decreasing order
-#    for w in range(W-1):
-#        constraints.append(Opp[0][w] > Opp[0][w+1])
-#
-#    return constraints
-
-# function used for imposing the optimization constraints for both approaches
-#def smt_obj_manual(N, Home, obj, counts, solver):
-#    W=N-1
-#    
-#    # count the number of home games
-#    count_home = [Sum([If(Home[t][w], 1, 0) for w in range(W)]) for t in range(N)]
-#    for t in range(N):
-#        # implied constraint to make the home games converge faster
-#        solver.add(count_home[t]<=max(counts))
-#        solver.add(count_home[t]>=min(counts))
-#    
-#    # Upper bound and lower bound are imposed on the objective function
-#    solver.add(Sum([Abs(2*count_home[t] - W) for t in range(N)]) <obj)
-#    solver.add(Sum([Abs(2*count_home[t] - W) for t in range(N)]) >=N)
-#
-#    # return the solver and Home
-#    return solver, Home
 
 # create the matches for the preprocessing
 def circle_method_pairs(n):
@@ -246,7 +207,7 @@ def preprocess_approach_domains(N):
     # One of the two teams is home or away 
     for w in range(W):
         for (u,v) in matches[w]:
-            constraints.append(Not(Iff(Home[u-1][w], Home[v-1][w])))
+            constraints.append(Xor(Home[u-1][w], Home[v-1][w]))
 
     # Break global home/away flip
     constraints.append(Home[0][0])
@@ -307,10 +268,7 @@ def preprocess_approach_domains_opt(N, counts, obj):
     # One of the two teams is home or away 
     for w in range(W):
         for (u,v) in matches[w]:
-            constraints.append(Or(
-                And(Home[u-1][w], Not(Home[v-1][w])),
-                And(Not(Home[u-1][w]), Home[v-1][w]))
-            )
+            constraints.append(Xor(Home[u-1][w], Home[v-1][w]))
 
     count_home = [Plus([Ite(Home[t][w], Int(1), Int(0)) for w in range(W)]) for t in range(N)]
     for t in range(N):

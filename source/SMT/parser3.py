@@ -47,7 +47,8 @@ def main():
             f.write("(get-model)\n")
             f.flush()
             end=time.time()-start
-            total_time+=end
+            total_time+=int(end)
+            print(total_time)
             stdout, stderr, elapsed = run_solver(f.name, args.solver, args.timeout-total_time, seed=seed, phase_sel=phase)
             tmp_path = f.name
         os.remove(tmp_path)
@@ -58,7 +59,7 @@ def main():
         else:
             solved = 1
         
-        total_time += elapsed
+        total_time += int(elapsed)
 
         if solved != 0:
             assigns = parse_model(stdout)
@@ -90,10 +91,10 @@ def main():
                     f.write("(get-model)\n")
                     f.flush() 
                     end3=time.time()-start3
-                    total_time+=end3
+                    total_time+=int(end3)
                     stdout, stderr, elapsed3 = run_solver(f.name, args.solver, args.timeout - total_time, seed=seed, phase_sel=phase) 
                     os.remove(f.name)
-                total_time += elapsed3
+                total_time += int(elapsed3)
 
                 assigns = parse_model(stdout)
                 if not assigns:
@@ -123,7 +124,7 @@ def main():
             f.write("(get-model)\n")
             f.flush()
             end3=time.time()-start3
-            total_time+=end3
+            total_time+=int(end3)
             stdout, stderr, elapsed3 = run_solver(f.name, args.solver, args.timeout-total_time, seed=seed, phase_sel=phase)
             tmp_path = f.name
         os.remove(tmp_path)
@@ -133,7 +134,7 @@ def main():
         else:
             solved = 1
 
-        total_time+=elapsed3+end3
+        total_time+=int(elapsed3)
 
         if solved != 0:
             assigns = parse_model(stdout)
@@ -168,10 +169,10 @@ def main():
                     f.write("(get-model)\n")
                     f.flush() 
                     end4=time.time()-start4
-                    total_time+=end4
+                    total_time+=int(end4)
                     stdout, stderr, elapsed4 = run_solver(f.name, args.solver, args.timeout - total_time, seed=seed, phase_sel=phase) 
                     os.remove(f.name)
-                total_time += elapsed4
+                total_time += int(elapsed4)
 
                 assigns = parse_model(stdout)
                 if not assigns:
