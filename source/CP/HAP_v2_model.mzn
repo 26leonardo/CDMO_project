@@ -1,6 +1,7 @@
 % This HAP (Home Away Problem) model is the second part of the pipeline. It is used
 % to balance the home matches with the away matches for each team.
-% It does it minimizing an objective function, which in this 'v1' version is naive
+% It does it minimizing an objective function, which in this 'v2' version is more
+% optimized than in the v1
 include "globals.mzn";
 
 % requires partial solution "partial_output.dzn", which contains the results of the unbalanced calendar
@@ -16,32 +17,32 @@ array[1..periods, 1..weeks] of var 1..2: home_team_index;
 
 % Helper: count of home games per team
 array[TEAMS] of var 0..weeks: home_games;
-array[TEAMS] of var 0..weeks: away_games;
 
 
-% Objective function: minimize imbalance as the difference between the home count and away count
-var int: objective_function = sum([abs(home_games[t] - away_games[t] ) | t in TEAMS]);
+% --- Objective: minimize imbalance as the difference between the maximum value of home count and the minimum value
+var int: max_home = max(home_games);
+var int: min_home = min(home_games);
+var int: objective_function = max_home - min_home;
 
 constraint % symmetry breaking constraint: indicates that in the first match, the first team has to play at home
     home_team_index[1,1] == 1;
 
-constraint % this is used to assign to the variables the count of home and away games for each team
+constraint % this is used to assign to the variables the count of home games for each team
     forall(t in TEAMS) (
-        home_games[t] = sum([ sol[p,w,home_team_index[p,w]] == t | p in 1..periods, w in 1..weeks ]) /\
-        away_games[t] = sum([ sol[p,w,3-home_team_index[p,w]] == t | p in 1..periods, w in 1..weeks ])
+        home_games[t] = sum([ sol[p,w,home_team_index[p,w]] == t | p in 1..periods, w in 1..weeks ])
     );
 
 constraint % indicates that the obj func should be minimized until it reaches the value 'n'
-    objective_function >= n;
+    objective_function >= 1;
 
 
 
 solve minimize objective_function;
 
-
+% --- Output
 output [
   "{",
-  "\"optimal\":" ++ show(objective_function == n) ++ ",",
+  "\"optimal\":" ++ show(objective_function == 1) ++ ",",
   "\"obj\":" ++ show(objective_function) ++ ",",
   "\"sol\":[",
     join(",",

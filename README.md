@@ -133,11 +133,13 @@ The following list serves as index to know which version runs a particular model
 
 | version  | meaning / which implementation is used                                                                                                                                           |
 | --------------------- | ---------------------------------------------------------------------------------- |
-| `v1`                  | Will run the round_robin_model with HAP_v1_model optimization, with 'chuffed' solver |
-| `v2`                  | Will run the constraint_v2_model with HAP_v1_model optimization, with 'chuffed' solver |
-| `v3`                  | Will run the constraint_v2_model non optimized, with 'gecode' solver |
-| `v4`                  | Will run the constraint_v1_model non optimized, with 'gecode' solver |
-| `v5`                  | Will run the naive_model non optimized, with 'gecode' solver |
+| `v1`                  | Will run the naive_model not balanced, with 'gecode' solver |
+| `v2`                  | Will run the better_model not balanced, with 'gecode' solver |
+| `v3`                  | Will run the better_model not balanced, with 'chuffed' solver |
+| `v4`                  | Will run the better_model_chan not balanced, with 'chuffed' solver |
+| `v5`                  | Will run the circle_met_model not balanced, with 'chuffed' solver |
+| `v6`                  | Will run the circle_met_model_chan, balanced with HAP_v1, with 'chuffed' solver |
+| `v7`                  | Will run the circle_met_model_chan, balanced with HAP_v2, with 'chuffed' solver |
 
 ---
 
