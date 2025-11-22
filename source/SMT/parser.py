@@ -22,14 +22,16 @@ def main():
     seed=args.seed
     phase_sel=4
     if opt in ['true', 'True']:
+        opt=True
         approach = f'py_{args.solver}_{args.approach}_opt'
     else:
+        opt=False
         approach = f'py_{args.solver}_{args.approach}'
 
     # define the channeled approach
     if args.approach == 'channeled':
         start=time.time()
-        s, Per, Home = channeled_model_no_check(N)
+        s, Per, Home = channeled_model_no_check(N, opt)
         s=s.simplify()
         write_smtlib(s, f'source/{approach}_{N}.smt2')
         with open(f'source/{approach}_{N}.smt2', "a") as f:
@@ -38,18 +40,15 @@ def main():
         # Run the solver
         diff=time.time()-start
         total_time+=int(diff)
-        print(total_time)
         stdout, stderr, elapsed = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=4)
         # Delete the file after use
         os.remove(f'source/{approach}_{N}.smt2')
         total_time+=int(elapsed)
         status=get_status(stdout)
-        print(elapsed)
         if status=='timeout' or status in ('unknown', 'unsat'):
             solved = 0
         else:
             solved = 1
-        print(total_time)
 
         if solved != 0:
             assigns = parse_model(stdout)
@@ -58,11 +57,12 @@ def main():
             counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
             obj = int(sum(abs(2 * c - W) for c in counts))
             print(counts)
+            print(obj)
         else:
             # handle timeout/unsat
             pass
         
-        if opt in ['true', 'True']:
+        if opt:
             while solved != 0 and not (status=='timeout' or status in ('unknown', 'unsat') ):
                 sol1, sol2 = stdout, stderr
                 start2=time.time()

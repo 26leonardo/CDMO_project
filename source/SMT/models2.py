@@ -38,27 +38,24 @@ def channeled_model_no_check(N):
             solver.add(Sum([If(Per[t][w] == p, 1, 0) for t in range(N)]) == 2)
 
     for t in range(N):
-        for p in range(1, P+1):                
+        for p in range(1, P + 1):
             solver.add(Sum([If(Per[t][w] == p, 1, 0) for w in range(W)]) <= 2)
 
     return solver, Per, Home, Opp
 
-def symmetry_breaking_constraints(N, solver, Home, Per, Opp):
+def symmetry_breaking_constraints(N, solver, Home, Per, Opp, opt):
     W = N - 1
     P = N // 2
-    
-    # Break global home/away flip
-    #solver.add(Home[0][0])
 
-    # Break the flip of the opponents
-    solver.add(Opp[0][0] == N)
+    if opt:
+        solver.add(Opp[0][0] == N)
     
-    # Fix week 0 layout period
-    #for p in range(1, P+1):
-    #    a, b = p, N + 1 - p
-    #    solver.add(Per[a-1][0] == p)
-    #    solver.add(Per[b-1][0] == p)
-    
+    ## Fix week 0 layout period
+    for p in range(1, P+1):
+       a, b = p, N + 1 - p
+       solver.add(Per[a-1][0] == p)
+       solver.add(Per[b-1][0] == p)
+
     # fix team 1 opponents in decreasing order
     for w in range(W-1):
         solver.add(Opp[0][w] > Opp[0][w+1])
@@ -71,7 +68,6 @@ def smt_obj_manual(N, Home, obj, counts, solver):
     
     # count the number of home games
     count_home = [Sum([If(Home[t][w], 1, 0) for w in range(W)]) for t in range(N)]
-
     for t in range(N):
         # implied constraint to make the home games converge faster
         solver.add(count_home[t]<=max(counts))
@@ -155,8 +151,8 @@ def symmetry_breaking_constraints_preprocess(N, solver, Home, Per, matches):
     
     # Break global home/away flip
     solver.add(Home[0][0])
-    
-    # Fix week 0 layout period
+
+    ## Fix week 0 layout period
     for i, (u, v) in enumerate(matches[0], start=1):
         solver.add(Per[u-1][0] == i)
         solver.add(Per[v-1][0] == i)

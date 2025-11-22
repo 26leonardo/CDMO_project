@@ -2,7 +2,7 @@
 from pysmt.shortcuts import *
 from pysmt.typing import *
 
-def channeled_model_no_check(N):
+def channeled_model_no_check(N, opt=None, all=None):
     W = N - 1
     P = N // 2
 
@@ -49,21 +49,36 @@ def channeled_model_no_check(N):
             constraints.append(LE(Plus([Ite(Equals(Per[t][w],Int(p)), Int(1), Int(0)) for w in range(W)]),Int(2)))
 
     # Break global home/away flip
-    constraints.append(Home[0][0])
+    if all:
+        constraints.append(Home[0][0])
+        constraints.append(Equals(Opp[0][0], Int(N)))
+        for p in range(1, P+1):
+            a, b = p, N + 1 - p
+            constraints.append(Equals(Per[a-1][0], Int(p)))
+            constraints.append(Equals(Per[b-1][0], Int(p)))
+        for w in range(W-1):
+            constraints.append(GT(Opp[0][w], Opp[0][w+1]))
 
+        formula=And(constraints)
+
+        return formula, Per, Home
+
+    if opt:
+        constraints.append(Home[0][0])
+    else: 
     # Break the flip of the opponents
-    constraints.append(Equals(Opp[0][0], Int(N)))
+        constraints.append(Equals(Opp[0][0], Int(N)))
     
-    # Fix week 0 layout period
+    ## Fix week 0 layout period
     for p in range(1, P+1):
         a, b = p, N + 1 - p
         constraints.append(Equals(Per[a-1][0], Int(p)))
         constraints.append(Equals(Per[b-1][0], Int(p)))
-    #
+    
     # fix team 1 opponents in decreasing order
     for w in range(W-1):
         constraints.append(GT(Opp[0][w], Opp[0][w+1]))
-#
+
     formula=And(constraints)
 
     return formula, Per, Home
@@ -127,9 +142,6 @@ def channeled_model_no_check_opt(N, counts, obj):
     # Break global home/away flip
     constraints.append(Home[0][0])
 
-    # Break the flip of the opponents
-    constraints.append(Equals(Opp[0][0], Int(N)))
-    
     # Fix week 0 layout period
     for p in range(1, P+1):
         a, b = p, N + 1 - p
@@ -291,17 +303,3 @@ def preprocess_approach_domains_opt(N, counts, obj):
     formula = And(constraints) 
 
     return formula, Per, Home
-
-
-#def symmetry_breaking_constraints_preprocess(N, solver, Home, Per, matches):
-#    
-#    # Break global home/away flip
-#    solver.add(Home[0][0])
-#    
-#    # Fix week 0 layout period
-#    for i, (u, v) in enumerate(matches[0], start=1):
-#        solver.add(Per[u-1][0] == i)
-#        solver.add(Per[v-1][0] == i)
-#    
-#
-#    return solver

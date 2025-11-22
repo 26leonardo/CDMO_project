@@ -21,14 +21,22 @@ def main():
     opt=args.optimize
     seed=args.seed
     if opt in ['true', 'True']:
+        opt=True
         approach = f'{args.solver}_{args.approach}_opt'
     else:
+        opt=False
         approach = f'{args.solver}_{args.approach}'
         
     if args.solver=='z3' and N<=14:
-        phase=4
+        if args.approach=='preprocess':
+            phase=4
+        else:
+            phase=4
     elif args.solver=='z3' and N>14:
-        phase=5
+        if args.approach=='preprocess':
+            phase=5
+        else:
+            phase=4
     else:
         phase=None
 
@@ -36,20 +44,18 @@ def main():
     if args.approach == 'channeled':
         start=time.time()
         s, Per, Home, Opp = channeled_model_no_check(N)
-        s = symmetry_breaking_constraints(N, s, Home, Per, Opp)
+        s = symmetry_breaking_constraints(N, s, Home, Per, Opp, opt)
         smt = s.to_smt2()
         
 
         with tempfile.NamedTemporaryFile("w", suffix=".smt2", delete=False) as f:
             f.write(f"(set-logic QF_LIA)\n(set-option :produce-models true)\n(set-option :timeout 300000)\n(set-option :random-seed {seed})\n")
-            #f.write("(set-option :dpll.branching_cache_phase 2)\n(set-option :dpll.branching_initial_phase 2)\n(set-option :dpll.branching_random_frequency 0.0)\n")
             f.write(smt)
             f.write("(get-model)\n")
             f.flush()
             end=time.time()-start
             total_time+=int(end)
-            print(total_time)
-            stdout, stderr, elapsed = run_solver(f.name, args.solver, args.timeout-total_time, seed=seed, phase_sel=phase)
+            stdout, stderr, elapsed = run_solver(f.name, args.solver, args.timeout-total_time, seed=seed, phase_sel=2)
             tmp_path = f.name
         os.remove(tmp_path)
 
@@ -72,27 +78,25 @@ def main():
             # handle timeout/unsat
             pass
         
-        if opt in ['true', 'True']:
+        if opt is True:
             while solved != 0 and not (status=='timeout' or status in ('unknown', 'unsat') ):
                 sol1, sol2 = stdout, stderr
                 start3=time.time()
-                mid=obj//2
+                mid=(N+obj)//2
                 s, Per, Home, Opp = channeled_model_no_check(N)
                 s, Home = smt_obj_manual(N, Home, mid, counts, s)
-                s = symmetry_breaking_constraints(N, s, Home, Per, Opp)
+                s = symmetry_breaking_constraints(N, s, Home, Per, Opp, opt)
                 smt = s.to_smt2()
 
 
                 with tempfile.NamedTemporaryFile("w", suffix=".smt2", delete=False) as f:
                     f.write(f"(set-logic QF_LIA)\n(set-option :produce-models true)\n(set-option :timeout 300000)\n(set-option :random-seed {seed})\n")
-                    f.write("(set-option :dpll.branching_cache_phase 2)\n(set-option :dpll.branching_initial_phase 2)\n(set-option :dpll.branching_random_frequency 0.0)\n" \
-                    "(set-option :produce-models true) \n (set-option :auto-config false) \n (set-option :sat.cardinality.encoding ordered) \n (set-option :arith.branch_cut_ratio 1)")
                     f.write(smt)
                     f.write("(get-model)\n")
                     f.flush() 
                     end3=time.time()-start3
                     total_time+=int(end3)
-                    stdout, stderr, elapsed3 = run_solver(f.name, args.solver, args.timeout - total_time, seed=seed, phase_sel=phase) 
+                    stdout, stderr, elapsed3 = run_solver(f.name, args.solver, args.timeout - total_time, seed=seed, phase_sel=2) 
                     os.remove(f.name)
                 total_time += int(elapsed3)
 
@@ -104,7 +108,6 @@ def main():
                 Home = read_grid(assigns, "Home", T, W, default=False)
                 counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
                 obj = int(sum(abs(2 * c - W) for c in counts))
-                obj-=N
                 status=get_status(stdout)
                 print(counts)
 
