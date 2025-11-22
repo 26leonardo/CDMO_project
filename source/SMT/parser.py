@@ -128,7 +128,7 @@ def main():
             pass
 
 
-        if opt in ['true', 'True']:
+        if opt is True:
             while solved != 0 and not (status=='timeout' or status in ('unknown', 'unsat') ):
                 sol1, sol2 = stdout, stderr
                 start4=time.time()
