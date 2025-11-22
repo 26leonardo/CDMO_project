@@ -9,38 +9,67 @@ UNSATISFIABLE_SOLUTION_DEFAULT_MESSAGE = "UNSATISFIABLE====="
 INPUT_DATA_FILENAME = "source/CP/_cache_/preprocessed_data" + ".json"
 PARTIAL_OUTPUT_FILENAME = "source/CP/_cache_/partial_output" + ".json"
 
+# configuration of all the available experiments
 EXECUTION_CONFIGURATIONS = {
     "v1": {
-        "first_model": "round_robin_model.mzn",
-        "hap_model": "HAP_v1_model.mzn",
-        "solver": "chuffed",
-        "round_robin": True
-    }, 
+        "first_model": "naive_model.mzn",
+        "hap_model":  None,
+        "solver": "gecode",
+        "round_robin": False,
+        "preprocessing": False
+    },
     "v2": {
-        "first_model": "constraint_v2_model.mzn",
-        "hap_model": "HAP_v1_model.mzn",
-        "solver": "chuffed",
-        "round_robin": False
+        "first_model": "better_model.mzn",
+        "hap_model":  None,
+        "solver": "gecode",
+        "round_robin": False,
+        "preprocessing": False
     },
     "v3": {
-        "first_model": "constraint_v2_model.mzn",
-        "hap_model": None,
-        "solver": "gecode",
-        "round_robin": False
+        "first_model": "better_model.mzn",
+        "hap_model":  None,
+        "solver": "chuffed",
+        "round_robin": False,
+        "preprocessing": False
     },
     "v4": {
-        "first_model": "constraint_v1_model.mzn",
-        "hap_model": None,
-        "solver": "gecode",
-        "round_robin": False
+        "first_model": "better_model_chan.mzn",
+        "hap_model":  None,
+        "solver": "chuffed",
+        "round_robin": False,
+        "preprocessing": False
     },
     "v5": {
-        "first_model": "naive_model.mzn",
-        "hap_model": None,
-        "solver": "gecode",
-        "round_robin": False
+        "first_model": "circle_met_model.mzn",
+        "hap_model":  None,
+        "solver": "chuffed",
+        "round_robin": True,
+        "preprocessing": True
+    },
+    "v6": {
+        "first_model": "circle_met_model_chan.mzn",
+        "hap_model":  "HAP_v1_model.mzn",
+        "solver": "chuffed",
+        "round_robin": True,
+        "preprocessing": True
+    },
+    "v7": {
+        "first_model": "circle_met_model_chan.mzn",
+        "hap_model":  "HAP_v2_model.mzn",
+        "solver": "chuffed",
+        "round_robin": True,
+        "preprocessing": True
     }
 }
+
+# list of parameters 'n' to experiment with. Each row contains a list corresponding to each experiment
+N_LISTS = [(6,8,10),
+            (6,8,10,12,14),
+            (6,8,10,12,14,16),
+            (6,8,10,12,14,16),
+            (6,8,10,12,14,16,18,20),
+            (6,8,10,12,14,16,18,20),
+            (6,8,10,12,14,16,18,20)]
 
 def extract_between(text: str, substring: str) :
     # Find where the substring starts
@@ -94,7 +123,7 @@ def write_triangular(n: int):
     print(f"File '{INPUT_DATA_FILENAME}' written with {len(matches)} matches.")
 
 
-def run_minizinc(model, solver, input_data_filename, timeout, version):
+def run_minizinc(model, solver, input_data_filename, timeout, version, preprocess, n):
     raw_output = None
     solver_type_key = f"{solver}_{version}"
     try:
@@ -103,7 +132,7 @@ def run_minizinc(model, solver, input_data_filename, timeout, version):
             [
                 "minizinc",
                 "--time-limit", str(timeout),
-                "--data", f"{input_data_filename}",
+                "--data" if preprocess else "-D", f"{input_data_filename}" if preprocess else f"n={n}",
                 "--solver", solver,
                 "--statistics",
                 "--seed", "1234",
@@ -114,7 +143,6 @@ def run_minizinc(model, solver, input_data_filename, timeout, version):
             text=True,
             check=True
         )
-
         # If output is JSON, parse it
         raw_output = result.stdout
         solution_time_elapsed = int(float(extract_between(raw_output, "solveTime=")))
@@ -150,17 +178,20 @@ def execution_cycle(n, version):
     round_robin = exec_env["round_robin"]
     optional_hap_model = exec_env["hap_model"]
     solver = exec_env["solver"]
+    preprocess = exec_env["preprocessing"]
 
     output_path = Path(f"/CDMO/res/CP/{n}.json")
     partial_output_path = Path(f"./{PARTIAL_OUTPUT_FILENAME}")
 
+    # write preprocessed data if requested
     if round_robin:
         write_tridimensional_round_robin(n)
     else:
         write_triangular(n)
 
-    result1 = run_minizinc(exec_env["first_model"], solver , INPUT_DATA_FILENAME, time_limit, version)
-
+    # run the specified minizinc model for the calendar scheduling
+    result1 = run_minizinc(exec_env["first_model"], solver , INPUT_DATA_FILENAME, time_limit, version, preprocess, n)
+    
     if result1:
         print("Partial result:", result1)
 
@@ -172,10 +203,10 @@ def execution_cycle(n, version):
     if optional_hap_model and len(result1[solver_type_key]["sol"]) != 0:
         partial_output_path.write_text(partial_result)
     
-        result2 = run_minizinc(optional_hap_model, solver, PARTIAL_OUTPUT_FILENAME, time_limit-10-(partial_timer*1000), version)
+        result2 = run_minizinc(optional_hap_model, solver, PARTIAL_OUTPUT_FILENAME, time_limit-10-(partial_timer*1000), version, preprocess, n)
 
         result2[solver_type_key]["time"] = result2[solver_type_key]["time"] + partial_timer
-
+        
         if output_path.exists():
             existing_data = json.loads(output_path.read_text())
         else:
@@ -184,6 +215,7 @@ def execution_cycle(n, version):
         output_path.write_text(json.dumps(existing_data))
 
         print("Accessible result:", result2)
+    # else save the non hap-balanced results
     else:
         if output_path.exists():
             existing_data = json.loads(output_path.read_text())
@@ -215,16 +247,23 @@ if __name__ == "__main__":
     n = args.instance
     version = args.version
 
+    # depending on argument availability choose the execution mode
+
     if n == 0 and version == "None":
-        N_LISTS = [(6,8,10,12,14,16),
-                   (6,8,10,12,14),
-                   (6,8,10,12),
-                   (6,8,10,12),
-                   (6,8,10)]
-        
         for version_key, instance_n_list in zip(EXECUTION_CONFIGURATIONS, N_LISTS):
             for instance_n in instance_n_list:
                 execution_cycle(instance_n, version_key)
+
+    elif n == 0 and version != "None":
+        for version_key, instance_n_list in zip(EXECUTION_CONFIGURATIONS, N_LISTS):
+            if version_key == version:
+                for instance_n in instance_n_list:
+                    execution_cycle(instance_n, version_key)
+    
+    elif n != 0 and version == "None":
+        for version_key, instance_n_list in zip(EXECUTION_CONFIGURATIONS, N_LISTS):
+                for _ in instance_n_list:
+                    execution_cycle(n, version_key)
 
     else:
         execution_cycle(n, version)
