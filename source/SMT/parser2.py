@@ -132,7 +132,7 @@ def main():
             tmp_path = f.name
         os.remove(tmp_path)
         status=get_status(stdout)
-        if status=='timeout' or status in ('unknown', 'unsat')  :
+        if status=='timeout' or status in ('unknown', 'unsat'):
             solved = 0
         else:
             solved = 1
@@ -190,7 +190,7 @@ def main():
                 print(counts)
 
     
-    if status=='timeout' and solved==0:
+    if (status in ('timeout', 'unknown')) and solved==0:
         N = args.N or 0
         os.makedirs(args.outdir, exist_ok=True)
         outpath = os.path.join(args.outdir, f"{N}.json") if N else os.path.join(args.outdir, "unknownN.json")
@@ -204,7 +204,7 @@ def main():
         print(f"[TIMEOUT] merged placeholder into {outpath}")
         return
 
-    if (status in ('unknown', 'unsat')) and solved==0:
+    if (status in ('unsat')) and solved==0:
         N = args.N or 0
         os.makedirs(args.outdir, exist_ok=True)
         outpath = os.path.join(args.outdir, f"{N}.json") if N else os.path.join(args.outdir, "unknownN.json")
@@ -219,7 +219,7 @@ def main():
         return
 
 
-    if (status=='timeout' or status in ('unknown', 'unsat') ) and solved>0:
+    if (status=='timeout' or status in ('unknown','unsat') ) and solved>0:
         assigns = parse_model(sol1)
         Per  = read_grid(assigns, "Per",  T, W, default=None)
         Home = read_grid(assigns, "Home", T, W, default=False)
