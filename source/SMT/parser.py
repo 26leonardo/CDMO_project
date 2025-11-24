@@ -168,7 +168,7 @@ def main():
                 print(counts)
 
     
-    if status=='timeout' and solved==0:
+    if (status in ('timeout','unknown')) or solved==0:
         N = args.N or 0
         os.makedirs(args.outdir, exist_ok=True)
         outpath = os.path.join(args.outdir, f"{N}.json") if N else os.path.join(args.outdir, "unknownN.json")
@@ -182,7 +182,7 @@ def main():
         print(f"[TIMEOUT] merged placeholder into {outpath}")
         return
 
-    if (status in ('unknown', 'unsat')) and solved==0:
+    if (status in ('unsat')) and solved==0:
         N = args.N or 0
         os.makedirs(args.outdir, exist_ok=True)
         outpath = os.path.join(args.outdir, f"{N}.json") if N else os.path.join(args.outdir, "unknownN.json")
