@@ -12,7 +12,7 @@ def main():
     ap.add_argument("--N", type=int, required=False, help="Teams (even). If omitted, inferred.")
     ap.add_argument("--optimize", default='false', choices=["False", "True", 'true', 'false'], help="Optimization is required?")
     ap.add_argument("--outdir", default="res/SMT", help="Output directory")
-    ap.add_argument("--seed", default=0, help="Seed")
+    ap.add_argument("--seed", default=90, help="Seed")
     args = ap.parse_args()
 
     # variable and name which will be used later and for the name
@@ -20,7 +20,18 @@ def main():
     total_time=0
     opt=args.optimize
     seed=args.seed
-    phase_sel=4
+    if args.solver=='z3' and N<=14:
+        if args.approach=='preprocess':
+            phase_sel=4
+        else:
+            phase_sel=4
+    elif args.solver=='z3' and N>14:
+        if args.approach=='preprocess':
+            phase_sel=5
+        else:
+            phase_sel=4
+    else:
+        phase_sel=None
     if opt in ['true', 'True']:
         opt=True
         approach = f'py_{args.solver}_{args.approach}_opt'
@@ -40,7 +51,7 @@ def main():
         # Run the solver
         diff=time.time()-start
         total_time+=int(diff)
-        stdout, stderr, elapsed = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=4)
+        stdout, stderr, elapsed = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=phase_sel)
         # Delete the file after use
         os.remove(f'source/{approach}_{N}.smt2')
         total_time+=int(elapsed)
@@ -57,7 +68,6 @@ def main():
             counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
             obj = int(sum(abs(2 * c - W) for c in counts))
             print(counts)
-            print(obj)
         else:
             # handle timeout/unsat
             pass
@@ -76,7 +86,7 @@ def main():
                 # Run the solver
                 diff2=time.time()-start2
                 total_time+=int(diff2)
-                stdout, stderr, elapsed4 = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=4)
+                stdout, stderr, elapsed4 = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=phase_sel)
                 os.remove(f'source/{approach}_{N}.smt2')
                 total_time += int(elapsed4)
 
@@ -212,9 +222,13 @@ def main():
             sol = build_sol_from_per_home(T, W, P, Per, Home)
     except Exception as e:
         os.makedirs(args.outdir, exist_ok=True)
-        outpath = os.path.join(args.outdir, f"{T}.json")
-        payload = {approach: {"time": int(args.timeout), "optimal": False, "obj": None, "sol": []}}
-        with open(outpath, "w") as f: json.dump(payload, f)
+        outpath = os.path.join(args.outdir, f"{N}.json") if N else os.path.join(args.outdir, "unknownN.json")
+        if os.path.exists(outpath):
+            try:
+                with open(outpath, "r") as f: existing = json.load(f)
+            except Exception: pass
+        existing[approach] = {"time": int(total_time), "optimal": True, "obj": None, "sol": []}
+        with open(outpath, "w") as f: json.dump(existing, f)
         raise SystemExit(f"[ERROR] {e}\nWrote placeholder {outpath}")
 
     # Objective: sum_t |2*home_t - W|

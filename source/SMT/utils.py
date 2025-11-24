@@ -267,7 +267,7 @@ def run_solver(smt_path, solver, timeout_s, seed, phase_sel=5):
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=timeout_s,  # Small buffer beyond internal timeout
+            timeout=timeout_s+0.5,  # Small buffer beyond internal timeout
             check=False,
             text=True,
             bufsize=8192,           # Larger buffer for better I/O performance

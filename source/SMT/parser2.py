@@ -12,7 +12,7 @@ def main():
     ap.add_argument("--N", type=int, required=False, help="Teams (even). If omitted, inferred.")
     ap.add_argument("--optimize", default='false', choices=["False", "True", 'true', 'false'], help="Optimization is required?")
     ap.add_argument("--outdir", default="res/SMT", help="Output directory")
-    ap.add_argument("--seed", default=0, help="Seed")
+    ap.add_argument("--seed", default=90, help="Seed")
     args = ap.parse_args()
 
     # variable and name which will be used later and for the name
@@ -55,7 +55,7 @@ def main():
             f.flush()
             end=time.time()-start
             total_time+=int(end)
-            stdout, stderr, elapsed = run_solver(f.name, args.solver, args.timeout-total_time, seed=seed, phase_sel=2)
+            stdout, stderr, elapsed = run_solver(f.name, args.solver, args.timeout-total_time, seed=seed, phase_sel=phase)
             tmp_path = f.name
         os.remove(tmp_path)
 
@@ -96,7 +96,7 @@ def main():
                     f.flush() 
                     end3=time.time()-start3
                     total_time+=int(end3)
-                    stdout, stderr, elapsed3 = run_solver(f.name, args.solver, args.timeout - total_time, seed=seed, phase_sel=2) 
+                    stdout, stderr, elapsed3 = run_solver(f.name, args.solver, args.timeout - total_time, seed=seed, phase_sel=phase) 
                     os.remove(f.name)
                 total_time += int(elapsed3)
 
