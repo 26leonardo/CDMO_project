@@ -122,7 +122,6 @@ def main():
 
         with tempfile.NamedTemporaryFile("w", suffix=".smt2", delete=False) as f:
             f.write(f"(set-logic QF_LIA)\n(set-option :produce-models true)\n(set-option :timeout 300000)\n(set-option :random-seed {seed})\n")
-            #f.write("(set-option :dpll.branching_cache_phase 2)\n(set-option :dpll.branching_initial_phase 2)\n(set-option :dpll.branching_random_frequency 0.0)\n")
             f.write(smt)
             f.write("(get-model)\n")
             f.flush()
@@ -166,8 +165,6 @@ def main():
 
                 with tempfile.NamedTemporaryFile("w", suffix=".smt2", delete=False) as f:
                     f.write(f"(set-logic QF_LIA)\n(set-option :produce-models true)\n(set-option :timeout 300000)\n(set-option :random-seed {seed})\n")
-                    #f.write("(set-option :dpll.branching_cache_phase 2)\n(set-option :dpll.branching_initial_phase 2)\n(set-option :dpll.branching_random_frequency 0.0)\n" \
-                    #"(set-option :produce-models true) \n (set-option :auto-config false) \n (set-option :sat.cardinality.encoding ordered) \n (set-option :arith.branch_cut_ratio 1)")
                     f.write(smt)
                     f.write("(get-model)\n")
                     f.flush() 
