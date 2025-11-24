@@ -248,7 +248,7 @@ def run_solver(smt_path, solver, timeout_s, seed, phase_sel=5):
     elif "cvc5" in solver_name:
         cmd = [
             solver, "--lang=smt2", '--produce-model',
-            f'--sat-random-seed={seed}',f'--seed={seed}','--decision=internal',
+            f'--sat-random-seed={seed}',f'--seed={seed}',
             smt_path
         ]
     elif 'math' in solver_name:
