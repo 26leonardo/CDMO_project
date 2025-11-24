@@ -138,8 +138,9 @@ The following list serves as index to know which version runs a particular model
 | `v3`                  | Will run the better_model not balanced, with 'chuffed' solver |
 | `v4`                  | Will run the better_model_chan not balanced, with 'chuffed' solver |
 | `v5`                  | Will run the circle_met_model not balanced, with 'chuffed' solver |
-| `v6`                  | Will run the circle_met_model_chan, balanced with HAP_v1, with 'chuffed' solver |
-| `v7`                  | Will run the circle_met_model_chan, balanced with HAP_v2, with 'chuffed' solver |
+| `v6`                  | Will run the circle_met_model_chan, not balanced, with 'chuffed' solver |
+| `v7`                  | Will run the circle_met_model_chan, balanced with HAP_v1, with 'chuffed' solver |
+| `v8`                  | Will run the circle_met_model_chan, balanced with HAP_v2, with 'chuffed' solver |
 
 ---
 

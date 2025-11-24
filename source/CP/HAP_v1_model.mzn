@@ -16,19 +16,17 @@ array[1..periods, 1..weeks] of var 1..2: home_team_index;
 
 % Helper: count of home games per team
 array[TEAMS] of var 0..weeks: home_games;
-array[TEAMS] of var 0..weeks: away_games;
 
 
 % Objective function: minimize imbalance as the difference between the home count and away count
-var int: objective_function = sum([abs(home_games[t] - away_games[t] ) | t in TEAMS]);
+var int: objective_function = sum([abs(2*home_games[t] - weeks ) | t in TEAMS]);
 
 constraint % symmetry breaking constraint: indicates that in the first match, the first team has to play at home
     home_team_index[1,1] == 1;
 
 constraint % this is used to assign to the variables the count of home and away games for each team
     forall(t in TEAMS) (
-        home_games[t] = sum([ sol[p,w,home_team_index[p,w]] == t | p in 1..periods, w in 1..weeks ]) /\
-        away_games[t] = sum([ sol[p,w,3-home_team_index[p,w]] == t | p in 1..periods, w in 1..weeks ])
+        home_games[t] = sum([ sol[p,w,home_team_index[p,w]] == t | p in 1..periods, w in 1..weeks ])
     );
 
 constraint % indicates that the obj func should be minimized until it reaches the value 'n'

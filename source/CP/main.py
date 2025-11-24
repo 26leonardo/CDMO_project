@@ -48,12 +48,19 @@ EXECUTION_CONFIGURATIONS = {
     },
     "v6": {
         "first_model": "circle_met_model_chan.mzn",
-        "hap_model":  "HAP_v1_model.mzn",
+        "hap_model":  None,
         "solver": "chuffed",
         "round_robin": True,
         "preprocessing": True
     },
     "v7": {
+        "first_model": "circle_met_model_chan.mzn",
+        "hap_model":  "HAP_v1_model.mzn",
+        "solver": "chuffed",
+        "round_robin": True,
+        "preprocessing": True
+    },
+    "v8": {
         "first_model": "circle_met_model_chan.mzn",
         "hap_model":  "HAP_v2_model.mzn",
         "solver": "chuffed",
@@ -67,6 +74,7 @@ N_LISTS = [(6,8,10),
             (6,8,10,12,14),
             (6,8,10,12,14,16),
             (6,8,10,12,14,16),
+            (6,8,10,12,14,16,18,20),
             (6,8,10,12,14,16,18,20),
             (6,8,10,12,14,16,18,20),
             (6,8,10,12,14,16,18,20)]
