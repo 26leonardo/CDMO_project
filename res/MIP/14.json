@@ -1,5 +1,5 @@
 {
-  "CBC_base_feasible_week1__42": {
+  "CBC_base_feasible_week1_": {
     "time": 5,
     "optimal": true,
     "obj": null,
@@ -384,8 +384,8 @@
       ]
     ]
   },
-  "CBC_i<j_balanced_week1__878641": {
-    "time": 83,
+  "CBC_i<j_balanced_week1_": {
+    "time": 85,
     "optimal": true,
     "obj": 0.0,
     "sol": [
@@ -769,7 +769,7 @@
       ]
     ]
   },
-  "CBC_prepro_anchor_balanced_random_half_328211356": {
+  "CBC_prepro_anchor_balanced_random_half": {
     "time": 21,
     "optimal": true,
     "obj": 0,
@@ -1154,8 +1154,8 @@
       ]
     ]
   },
-  "CBC_prepro_anchor_feasible_week1_26": {
-    "time": 20,
+  "CBC_prepro_anchor_feasible_week1": {
+    "time": 19,
     "optimal": true,
     "obj": null,
     "sol": [
@@ -1539,7 +1539,7 @@
       ]
     ]
   },
-  "GLPK_preproc_anchor_feasible_dual_26": {
+  "GLPK_preproc_anchor_feasible_dual": {
     "time": 93,
     "optimal": true,
     "obj": null,

@@ -116,7 +116,7 @@ def run_v123_batch(module_v123):
                     result = make_default_result()
                     meta = {"pulp_status":"ran_script", "runtime_sec": 0.0}
             except Exception as e:
-                print(f"[ERROR] n={nn} v={version} obj={objective} seed={seed} presolve={presolve}: {e}")
+                print(f"[ERROR] n={nn} v={version} obj={objective}  presolve={presolve}: {e}")
                 traceback.print_exc()
                 result = {"time": 300, "optimal": False, "obj": None, "sol": []}
                 meta = {"pulp_status":"error","runtime_sec":0.0}
@@ -125,15 +125,15 @@ def run_v123_batch(module_v123):
 
             # compute key as specified
             if solver == "CBC":
-                key = f"{solver}_{version}_{objective}_{warm_start}_{sym_flags}_{seed}"
+                key = f"{solver}_{version}_{objective}_{warm_start}_{sym_flags}"
             else:
                 if cuts:
-                    key = f"{solver}_{version}_{objective}_dual_cuts_{sym_flags}_{seed}"
+                    key = f"{solver}_{version}_{objective}_dual_cuts_{sym_flags}"
                 else:
-                    key = f"{solver}_{version}_{objective}_dual_{sym_flags}_{seed}"
+                    key = f"{solver}_{version}_{objective}_dual_{sym_flags}"
 
             # Logging
-            print(f"[DONE] n={nn} approach= {key} presolve={presolve} seed={seed} -> {out_path}")
+            print(f"[DONE] n={nn} approach= {key} presolve={presolve}  -> {out_path}")
             print(f"Status: {meta.get('pulp_status','?')} | optimal={result.get('optimal',False)} | obj={result.get('obj',None)}")
             print(f"Runtime (total, incl. 'presolve') = {total_runtime:.2f}s (time field written: {result.get('time')})")
 
@@ -202,7 +202,7 @@ def run_v2_single(n, module_v123):
             else:
                 key = f"{solver}_{version}_{objective}_dual_{sym_flags}_{seed}"
 
-        print(f"[DONE] n={nn} approach= {key} presolve={presolve} seed={seed} -> {out_path}")
+        print(f"[DONE] n={nn} approach= {key} presolve={presolve} -> {out_path}")
         print(f"Status: {meta.get('pulp_status','?')} | optimal={result.get('optimal',False)} | obj={result.get('obj',None)}")
         print(f"Runtime (total, incl. 'presolve') = {total_runtime:.2f}s (time field written: {result.get('time')})")
 
@@ -480,7 +480,7 @@ def run_v4_batch(module_v4):
                     result = make_default_result()
                     meta = {"pulp_status":"ran_script","runtime_sec":0.0}
             except Exception as e:
-                print(f"[ERROR] n={nn} v=preprocessing obj={objective} seed={seed} presolve={presolve}: {e}")
+                print(f"[ERROR] n={nn} v=preprocessing obj={objective}  presolve={presolve}: {e}")
                 traceback.print_exc()
                 result = {"time": 300, "optimal": False, "obj": None, "sol": []}
                 meta = {"pulp_status":"error","runtime_sec":0.0}
@@ -489,12 +489,12 @@ def run_v4_batch(module_v4):
 
             # compute key for preprocessing as specified
             if solver == "CBC":
-                key = f"{solver}_prepro_anchor_{objective}_{warm_start}_{seed}"
+                key = f"{solver}_prepro_anchor_{objective}_{warm_start}"
             else:
-                key = f"{solver}_preproc_anchor_{objective}_dual_{seed}"
+                key = f"{solver}_preproc_anchor_{objective}_dual"
 
             # Logging
-            print(f"[DONE] n={nn} approach= {key} presolve={presolve} seed={seed} -> {out_path}")
+            print(f"[DONE] n={nn} approach= {key} presolve={presolve}  -> {out_path}")
             print(f"Status: {meta.get('pulp_status','?')} | optimal={result.get('optimal',False)} | obj={result.get('obj',None)}")
             print(f"Runtime (total, incl. 'presolve') = {total_runtime:.2f}s (time field written: {result.get('time')})")
 
@@ -558,7 +558,7 @@ def run_v1_single(n, module_v123):
             else:
                 key = f"{solver}_{version}_{objective}_dual_{sym_flags}_{seed}"
 
-        print(f"[DONE] n={nn} approach= {key} presolve={presolve} seed={seed} -> {out_path}")
+        print(f"[DONE] n={nn} approach= {key} presolve={presolve}  -> {out_path}")
         print(f"Status: {meta.get('pulp_status','?')} | optimal={result.get('optimal',False)} | obj={result.get('obj',None)}")
         print(f"Runtime (total, incl. 'presolve') = {total_runtime:.2f}s (time field written: {result.get('time')})")
 
@@ -619,7 +619,7 @@ def run_v3_single(n, module_v123):
             else:
                 key = f"{solver}_{version}_{objective}_dual_{sym_flags}_{seed}"
 
-        print(f"[DONE] n={nn} approach= {key} presolve={presolve} seed={seed} -> {out_path}")
+        print(f"[DONE] n={nn} approach= {key} presolve={presolve}  -> {out_path}")
         print(f"Status: {meta.get('pulp_status','?')} | optimal={result.get('optimal',False)} | obj={result.get('obj',None)}")
         print(f"Runtime (total, incl. 'presolve') = {total_runtime:.2f}s (time field written: {result.get('time')})")
 
@@ -685,7 +685,7 @@ def run_v4_single(n, module_v4):
         else:
             key = f"{solver}_preprocessing_{objective}_dual_{seed}"
 
-        print(f"[DONE] n={nn} approach= {key} presolve={presolve} seed={seed} -> {out_path}")
+        print(f"[DONE] n={nn} approach= {key} presolve={presolve}  -> {out_path}")
         print(f"Status: {meta.get('pulp_status','?')} | optimal={result.get('optimal',False)} | obj={result.get('obj',None)}")
         print(f"Runtime (total, incl. 'presolve') = {total_runtime:.2f}s (time field written: {result.get('time')})")
 
