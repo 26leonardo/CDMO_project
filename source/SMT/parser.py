@@ -42,7 +42,7 @@ def main():
     # define the channeled approach
     if args.approach == 'channeled':
         start=time.time()
-        s, Per, Home = channeled_model_no_check(N, opt)
+        s, Per, Home = channeled_model_no_check(N)
         s=s.simplify()
         write_smtlib(s, f'source/{approach}_{N}.smt2')
         with open(f'source/{approach}_{N}.smt2', "a") as f:

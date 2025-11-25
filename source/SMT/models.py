@@ -2,7 +2,7 @@
 from pysmt.shortcuts import *
 from pysmt.typing import *
 
-def channeled_model_no_check(N, opt=None, all=None):
+def channeled_model_no_check(N):
     W = N - 1
     P = N // 2
 
@@ -48,26 +48,9 @@ def channeled_model_no_check(N, opt=None, all=None):
         for p in range(1, P + 1):
             constraints.append(LE(Plus([Ite(Equals(Per[t][w],Int(p)), Int(1), Int(0)) for w in range(W)]),Int(2)))
 
-    # Break global home/away flip
-    if all:
-        constraints.append(Home[0][0])
-        constraints.append(Equals(Opp[0][0], Int(N)))
-        for p in range(1, P+1):
-            a, b = p, N + 1 - p
-            constraints.append(Equals(Per[a-1][0], Int(p)))
-            constraints.append(Equals(Per[b-1][0], Int(p)))
-        for w in range(W-1):
-            constraints.append(GT(Opp[0][w], Opp[0][w+1]))
 
-        formula=And(constraints)
 
-        return formula, Per, Home
-
-    if opt:
-        constraints.append(Home[0][0])
-    else: 
-    # Break the flip of the opponents
-        constraints.append(Equals(Opp[0][0], Int(N)))
+    constraints.append(Home[0][0])
     
     ## Fix week 0 layout period
     for p in range(1, P+1):

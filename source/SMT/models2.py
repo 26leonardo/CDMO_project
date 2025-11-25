@@ -43,12 +43,12 @@ def channeled_model_no_check(N):
 
     return solver, Per, Home, Opp
 
-def symmetry_breaking_constraints(N, solver, Home, Per, Opp, opt):
+def symmetry_breaking_constraints(N, solver, Home, Per, Opp):
     W = N - 1
     P = N // 2
 
-    if opt:
-        solver.add(Opp[0][0] == N)
+    
+    solver.add(Home[0][0])
     
     ## Fix week 0 layout period
     for p in range(1, P+1):

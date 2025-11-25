@@ -44,7 +44,7 @@ def main():
     if args.approach == 'channeled':
         start=time.time()
         s, Per, Home, Opp = channeled_model_no_check(N)
-        s = symmetry_breaking_constraints(N, s, Home, Per, Opp, opt)
+        s = symmetry_breaking_constraints(N, s, Home, Per, Opp)
         smt = s.to_smt2()
         
 
@@ -85,7 +85,7 @@ def main():
                 mid=(N+obj)//2
                 s, Per, Home, Opp = channeled_model_no_check(N)
                 s, Home = smt_obj_manual(N, Home, mid, counts, s)
-                s = symmetry_breaking_constraints(N, s, Home, Per, Opp, opt)
+                s = symmetry_breaking_constraints(N, s, Home, Per, Opp)
                 smt = s.to_smt2()
 
 
