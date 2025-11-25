@@ -153,13 +153,13 @@ def run_v2_single(n, module_v123):
     """
     v2: Run two CBC cases using v_1_2_3.build_model:
       ("CBC","base","feasible",42,True,"","week1",False)
-      ("CBC","base","balanced",42,True,"","week1",False)
+      ("CBC","base","balanced",878641,True,"","week1",False)
 
     Writes results to res/additional_tests/{n}.json (merged keys).
     """
     cases = [
         (n, "CBC", "i!=j",  "feasible", 42, True,  "",      "week1", False),
-        (n, "CBC", "i!=j",  "balanced", 42, True,  "",      "week1", False),
+        (n, "CBC", "i!=j",  "balanced", 878641, True,  "",      "week1", False),
     ]
     out_dir = os.path.join(HERE, "..", "..", "res", "additional_tests")
     os.makedirs(out_dir, exist_ok=True)
@@ -220,7 +220,7 @@ def run_v5_single(n, module_v123):
     Output merges to res/additional_tests/{n}.json
     """
     SEEDS = [0, 1234567, 26, 42, 262626, 424242, 878641, 5656565]
-    cases = [(n, "CBC", "base", "feasible", s, False, "", "", False) for s in SEEDS]
+    cases = [(n, "CBC", "base", "feasible", s, True, "", "", False) for s in SEEDS]
 
     out_dir = os.path.join(HERE, "..", "..", "res", "additional_tests")
     os.makedirs(out_dir, exist_ok=True)
@@ -632,15 +632,15 @@ def run_v3_single(n, module_v123):
 def run_v4_single(n, module_v4):
     """
     For version v4 and given n run two configurations (chosen as "analogous"):
-        (n, "CBC", "balanced", True, 42, "random_half"),
+        (n, "CBC", "balanced", True, 328211356, "random_half"),
         (n, "CBC", "feasible", True, 26, "week1"),
         (n, "GLPK","balanced", True, 26, ""),
         (n, "GLPK","feasible", True, 26, "")
     Save outputs to res/additional_tests/{n}.json
     """
     cases = [
-        (n, "CBC", "balanced", True, 424242, "random_half"),
-        (n, "CBC", "feasible", True, 262626, "week1"),
+        (n, "CBC", "balanced", True, 328211356, "random_half"),
+        (n, "CBC", "feasible", True, 26, "week1"),
         (n, "GLPK","balanced", True, 26, ""),
         (n, "GLPK","feasible", True, 26, "")
     ]

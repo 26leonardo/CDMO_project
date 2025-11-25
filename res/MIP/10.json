@@ -1,6 +1,6 @@
 {
   "CBC_base_feasible_week1_": {
-    "time": 4,
+    "time": 3,
     "optimal": true,
     "obj": null,
     "sol": [
@@ -394,7 +394,7 @@
     ]
   },
   "GLPK_base_feasible_dual_B": {
-    "time": 6,
+    "time": 5,
     "optimal": true,
     "obj": null,
     "sol": [
@@ -591,7 +591,7 @@
     ]
   },
   "GLPK_i<j_balanced_dual_cuts_A": {
-    "time": 19,
+    "time": 18,
     "optimal": true,
     "obj": 0.0,
     "sol": [

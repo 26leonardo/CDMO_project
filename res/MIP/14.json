@@ -385,7 +385,7 @@
     ]
   },
   "CBC_i<j_balanced_week1_": {
-    "time": 85,
+    "time": 83,
     "optimal": true,
     "obj": 0.0,
     "sol": [
@@ -1923,5 +1923,11 @@
         ]
       ]
     ]
+  },
+  "GLPK_base_feasible_dual_B": {
+    "time": 300,
+    "optimal": false,
+    "obj": null,
+    "sol": []
   }
 }

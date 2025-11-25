@@ -1004,5 +1004,17 @@
         ]
       ]
     ]
+  },
+  "CBC_base_feasible_week1_": {
+    "time": 300,
+    "optimal": false,
+    "obj": null,
+    "sol": []
+  },
+  "CBC_i<j_balanced_week1_": {
+    "time": 300,
+    "optimal": false,
+    "obj": 0.0,
+    "sol": []
   }
 }
