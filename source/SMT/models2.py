@@ -47,7 +47,7 @@ def symmetry_breaking_constraints(N, solver, Home, Per, Opp):
     W = N - 1
     P = N // 2
 
-    
+    # Break the home/away flip
     solver.add(Home[0][0])
     
     ## Fix week 0 layout period

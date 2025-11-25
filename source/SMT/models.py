@@ -49,7 +49,7 @@ def channeled_model_no_check(N):
             constraints.append(LE(Plus([Ite(Equals(Per[t][w],Int(p)), Int(1), Int(0)) for w in range(W)]),Int(2)))
 
 
-
+    # Break the home away flip
     constraints.append(Home[0][0])
     
     ## Fix week 0 layout period
