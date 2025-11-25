@@ -1979,5 +1979,11 @@
         ]
       ]
     ]
+  },
+  "GLPK_i<j_balanced_dual_cuts_A": {
+    "time": 300,
+    "optimal": false,
+    "obj": 0.0,
+    "sol": []
   }
 }

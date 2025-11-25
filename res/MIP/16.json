@@ -1,6 +1,6 @@
 {
   "CBC_prepro_anchor_balanced_random_half": {
-    "time": 119,
+    "time": 120,
     "optimal": true,
     "obj": 0,
     "sol": [
@@ -503,7 +503,7 @@
     ]
   },
   "CBC_prepro_anchor_feasible_week1": {
-    "time": 45,
+    "time": 44,
     "optimal": true,
     "obj": null,
     "sol": [
@@ -1015,6 +1015,12 @@
     "time": 300,
     "optimal": false,
     "obj": 0.0,
+    "sol": []
+  },
+  "GLPK_preproc_anchor_feasible_dual": {
+    "time": 300,
+    "optimal": false,
+    "obj": null,
     "sol": []
   }
 }

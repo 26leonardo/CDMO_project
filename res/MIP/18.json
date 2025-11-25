@@ -635,5 +635,11 @@
         ]
       ]
     ]
+  },
+  "CBC_prepro_anchor_balanced_random_half": {
+    "time": 300,
+    "optimal": false,
+    "obj": 0,
+    "sol": []
   }
 }
