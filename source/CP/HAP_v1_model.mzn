@@ -15,22 +15,22 @@ array[1..periods, 1..weeks, 1..2] of int: sol; % matches calendar fixed
 array[1..periods, 1..weeks] of var 1..2: home_team_index;
 
 % Helper: count of home games per team
-array[TEAMS] of var 0..weeks: home_games;
+array[TEAMS] of var 0..weeks: difference;
 
 
-% Objective function: minimize imbalance as the difference between the home count and away count
-var int: objective_function = sum([abs(2*home_games[t] - weeks ) | t in TEAMS]);
+% Objective function: minimize the maximum difference between the home count and away count of each team
+var int: objective_function = max([difference[t] | t in TEAMS]);
 
 constraint % symmetry breaking constraint: indicates that in the first match, the first team has to play at home
     home_team_index[1,1] == 1;
 
-constraint % this is used to assign to the variables the count of home and away games for each team
+constraint % this is used to assign to the variables the difference between the count of home and away games for each team
     forall(t in TEAMS) (
-        home_games[t] = sum([ sol[p,w,home_team_index[p,w]] == t | p in 1..periods, w in 1..weeks ])
+        difference[t] = abs(( 2*sum([ sol[p,w,home_team_index[p,w]] == t | p in 1..periods, w in 1..weeks ]) ) - weeks)
     );
 
 constraint % indicates that the obj func should be minimized until it reaches the value 'n'
-    objective_function >= n;
+    objective_function >= 1;
 
 
 
@@ -39,7 +39,7 @@ solve minimize objective_function;
 
 output [
   "{",
-  "\"optimal\":" ++ show(objective_function == n) ++ ",",
+  "\"optimal\":" ++ show(objective_function == 1) ++ ",",
   "\"obj\":" ++ show(objective_function) ++ ",",
   "\"sol\":[",
     join(",",

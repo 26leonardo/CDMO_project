@@ -58,7 +58,7 @@ solve satisfy;
 output [
   "{",
   "\"optimal\":true,",
-  "\"obj\":\"None\",",
+  "\"obj\":null,",
   "\"sol\":[",
     join(",",
          [ "[" ++ join(",",

@@ -70,14 +70,14 @@ EXECUTION_CONFIGURATIONS = {
 }
 
 # list of parameters 'n' to experiment with. Each row contains a list corresponding to each experiment
-N_LISTS = [(6,8,10),
-            (6,8,10,12,14),
-            (6,8,10,12,14,16),
-            (6,8,10,12,14,16),
-            (6,8,10,12,14,16,18,20),
-            (6,8,10,12,14,16,18,20),
-            (6,8,10,12,14,16,18,20),
-            (6,8,10,12,14,16,18,20)]
+N_LISTS = [(4,6,8,10),
+            (4,6,8,10,12,14),
+            (4,6,8,10,12,14,16),
+            (4,6,8,10,12,14,16),
+            (4,6,8,10,12,14,16,18,20),
+            (4,6,8,10,12,14,16,18,20),
+            (4,6,8,10,12,14,16,18,20),
+            (4,6,8,10,12,14,16,18,20)]
 
 def extract_between(text: str, substring: str) :
     # Find where the substring starts
