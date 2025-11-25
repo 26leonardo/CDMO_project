@@ -68,10 +68,10 @@ def make_default_result():
 # ---- Predefined best-lists (from your description) ---------------------------
 V123_BESTS = [
     # (n_max, solver, version, objective, seed, presolve, sym_flags, warm_start, cuts)
-    (14, "CBC", "base",  "feasible", 42, True,  "",      "week1", False),
-    (14, "CBC", "i<j",   "balanced", 878641, True, "",      "week1", False),
-    (12, "GLPK","base",  "feasible", 26, True,  "B",     "",      False),
-    (10, "GLPK","i<j",   "balanced", 26, True,  "A",     "",      True),
+    (16, "CBC", "base",  "feasible", 42, True,  "",      "week1", False),
+    (16, "CBC", "i<j",   "balanced", 878641, True, "",      "week1", False),
+    (14, "GLPK","base",  "feasible", 26, True,  "B",     "",      False),
+    (12, "GLPK","i<j",   "balanced", 26, True,  "A",     "",      True),
 ]
 
 
@@ -437,10 +437,10 @@ def run_v6_single(n, module_v123, module_v4):
 
 V4_BESTS = [
     # (n_max, solver, objective, presolve, seed, warm_start)
-    (16, "CBC", "balanced", True, 328211356, "random_half"),
-    (18, "CBC", "feasible", True, 26, "week1"),
-    (12, "GLPK","balanced", True, 26, ""),
-    (14, "GLPK","feasible", True, 26, ""),
+    (18, "CBC", "balanced", True, 328211356, "random_half"),
+    (20, "CBC", "feasible", True, 26, "week1"),
+    (14, "GLPK","balanced", True, 26, ""),
+    (16, "GLPK","feasible", True, 26, ""),
 ]
 
 def run_v4_batch(module_v4):
