@@ -177,7 +177,7 @@ def main():
             try:
                 with open(outpath, "r") as f: existing = json.load(f)
             except Exception: pass
-        existing[approach] = {"time": int(total_time), "optimal": False, "obj": None, "sol": []}
+        existing[approach] = {"time": int(300), "optimal": False, "obj": None, "sol": []}
         with open(outpath, "w") as f: json.dump(existing, f)
         print(f"[TIMEOUT] merged placeholder into {outpath}")
         return
