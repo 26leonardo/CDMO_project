@@ -20,8 +20,7 @@ def main():
                         for n in range(4,23,2):
                             if (solver=='cvc5' and n>=18) or (solver=='opti' and app=='channeled' and n>=16):
                                 continue
-
-
+                            
                             if opt=='true':
                                 print(f'optimizing with solver:{solver} on approach {app} with N={n} and encoding {enc}', flush=True)
                             else:
