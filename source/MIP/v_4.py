@@ -192,22 +192,8 @@ def build_model_with_permutations(n: int,
             prob += home_minus_away[t] <= 1 + d[t], f"imb_pos_{t}"
             prob += -home_minus_away[t] <= 1 + d[t], f"imb_neg_{t}"
 
-        # Try to enforce a minimum imbalance of 1 per team when obj is not zero
-        # for t in T:
-        #     prob += d[t] >= 1, f"min_imbalance_lowerbound_{t}"
-
         # objective: minimize total imbalance
         prob += pulp.lpSum(d[t] for t in T), "min_total_imbalance"
-
-        # # z rappresenta il massimo tra tutti i d[t]
-        # z = pulp.LpVariable("z", lowBound=0, cat="Continuous")
-
-        # # vincoli: z >= d[t] per tutti t
-        # for t in T:
-        #     prob += z >= d[t], f"z_ge_d_{t}"
-
-        # # obiettivo: minimizzare z
-        # prob += z, "min_max_imbalance"
 
     # -------------------------
     # Warm start: set initial values for y (and h if present)

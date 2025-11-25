@@ -149,8 +149,8 @@ def build_model_with_permutations(n: int,
         # z represents the maximum absolute imbalance across teams
         z = pulp.LpVariable("z", lowBound=0, upBound=(n-1), cat=pulp.LpContinuous)
         for t in T:
-            prob += home_minus_away[t] <= z, f"z_ge_pos_{t}"
-            prob += -home_minus_away[t] <= z, f"z_ge_neg_{t}"
+            prob += home_minus_away[t] <= 1+ z, f"z_ge_pos_{t}"
+            prob += -home_minus_away[t] <= 1+z, f"z_ge_neg_{t}"
 
         # objective: minimize the maximum absolute imbalance
         prob += z, "min_max_imbalance"
@@ -340,8 +340,8 @@ if __name__ == '__main__':
     ]
     SEEDS = SEEDS[:5]  # limit for quicker tests
     bests = [
-        ([14,16,18], "CBC", "balanced", True, 328211356, "random_half"),
-        ([10,12,14], "GLPK","balanced", True, 26, ""),
+        # ([14,16,18], "CBC", "balanced", True, 328211356, "random_half"), # nessuno e' arrivato a 18 solo alcuni a 16 (come nella vanilla version)
+        ([16], "GLPK","balanced", True, 26, ""),
         # (16, "CBC", "balanced", True, 424242, "random_half"),
         # (18, "CBC", "feasible", True, 24494897, "week1"),
         # (18,"CBC","feasible",True,262626,"week1"),
