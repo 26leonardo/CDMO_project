@@ -215,7 +215,8 @@ def run_v4_batch(module_v4):
                 traceback.print_exc()
 
 BONUS = [
-    (16, "GLPK","balanced", True, 26, "")
+    (16, "GLPK","balanced", True, 26, ""),
+    (18, "CBC", "balanced", True, 262626, "random_half"),
 ]
 
 def run_v4_obj_batch(module_v4_obj):
@@ -260,7 +261,10 @@ def run_v4_obj_batch(module_v4_obj):
             total_runtime = global_end - global_start
 
             # compute key for preprocessing as specified
-            key = f"bon_{solver}_prepro_anchor_{objective}_dual"
+            if solver == "CBC":
+                key = f"bon_{solver}_prepro_{objective}_{warm_start}"
+            else:
+                key = f"bon_{solver}_prepro_anchor_{objective}_dual"
 
             # Logging
             print(f"[DONE] n={nn} approach= {key} presolve={presolve}  -> {out_path}")

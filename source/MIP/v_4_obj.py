@@ -146,14 +146,13 @@ def build_model_with_permutations_bon(n: int,
             H_expr = pulp.lpSum(home_terms) if home_terms else 0
             home_minus_away[t] = 2 * H_expr - (n - 1)
 
-        # z represents the maximum absolute imbalance across teams
-        z = pulp.LpVariable("z", lowBound=0, upBound=(n-1), cat=pulp.LpContinuous)
+        # d represents the maximum absolute imbalance across teams
+        d = pulp.LpVariable("d", lowBound=0, upBound=(n-1), cat=pulp.LpContinuous)
         for t in T:
-            prob += home_minus_away[t] <= 1+ z, f"z_ge_pos_{t}"
-            prob += -home_minus_away[t] <= 1+z, f"z_ge_neg_{t}"
-
+            prob += home_minus_away[t] <= 1+ d, f"d_ge_pos_{t}"
+            prob += -home_minus_away[t] <= 1+d, f"d_ge_neg_{t}"
         # objective: minimize the maximum absolute imbalance
-        prob += z, "min_max_imbalance"
+        prob += d, "min_max_imbalance"
 
 
     # --- Constraints ---
@@ -345,7 +344,7 @@ if __name__ == '__main__':
     ]
     SEEDS = SEEDS[5:]  # limit for quicker tests
     bests = [
-        ([18], "CBC", "balanced", True, 328211356, "random_half"), # nessuno e' arrivato a 18 solo alcuni a 16 (come nella vanilla version)
+        (16, "CBC", "balanced", True, [26, 42, 262626, 424242, 328211356], "random_half"), # nessuno e' arrivato a 18 solo alcuni a 16 (come nella vanilla version)
         # ([10,12,14,16], "GLPK","balanced", True, 26, ""),
         # (16, "CBC", "balanced", True, 424242, "random_half"),
         # (18, "CBC", "feasible", True, 24494897, "week1"),

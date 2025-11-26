@@ -131,7 +131,7 @@ The following list serves as index to know which version runs a particular model
 | `v4`                  | the best CBC and GLPK **pre** - **feasible/balanced**.                                                                             |
 | `v5`                  | **seed-sensitivity sweep** — runs the same CBC base-feasible case over many seeds (0, 1234567, 26, 42, 262626, 424242, 878641, 5656565). Usefull to see how changing seed, changes the the performance of the same model.          |
 | `v6`                  | **GLPK robustness & cuts** — multiple GLPK combos (seeds, cuts on/off, base vs i\<j) usefull to check the performance of GLPK |
-|`v7`|Runs a CBC-**balanced** instance using the obj func that min the max, instead of doing the sumary of the modules. To show that for CBC does not help the performance.|
+|`v7`|Runs a CBC-**balanced** instance over some seeds using the $obj_{func}$ $min-max$ and the $min-sum$ versions. |
 
 #### Where results are written
 

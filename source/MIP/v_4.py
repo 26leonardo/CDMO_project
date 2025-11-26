@@ -356,9 +356,10 @@ if __name__ == '__main__':
     ]
     SEEDS = SEEDS[:5]  # limit for quicker tests
     bests = [
+        (16, "CBC", "balanced", True, [26, 42, 262626, 424242, 328211356], "random_half")
         # (14, "CBC", "balanced", True, 274721127, "random_half"),
         # (16, "CBC", "balanced", True, 424242, "random_half"),
-        (18, "CBC", "feasible", True, 24494897, "week1"),
+        # (18, "CBC", "feasible", True, 24494897, "week1"),
         # (18,"CBC","feasible",True,262626,"week1"),
         # (14, "GLPK","balanced", True, 26, ""),
         # (16, "GLPK","feasible", True, 26, ""),
@@ -367,10 +368,10 @@ if __name__ == '__main__':
     ]
     # for seed in SEEDS:
     # for n in [14]:
-    for n ,solver, objective, presolve, seed, warm_start in bests:
-        # for i in range(10,n+1,2):
+    for n ,solver, objective, presolve, seeds, warm_start in bests:
+        for seed in seeds:
                                 nn = n
-                                res_dir = os.path.join(os.path.dirname(__file__), "..", "..", "res", "MIP")#,"temp", "ciao_8"
+                                res_dir = os.path.join(os.path.dirname(__file__),"..", "..", "res", "MIP", "temp", "obj_minsum")#,"temp", "ciao_8"
                                 os.makedirs(res_dir, exist_ok=True)
                                 out_path = os.path.join(res_dir, f"{nn}.json")
                                 global_start = time.time()
