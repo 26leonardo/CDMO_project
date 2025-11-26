@@ -71,7 +71,7 @@ def check_warmstart_feasibility_using_initials(prob, tol=1e-6, DEBUG=False):
             print(f" - {name}: LHS={lhs:.6f} {sym} RHS={rhs:.6f}")
     return violated
 
-def build_model_with_permutations(n: int,
+def build_model_with_permutations_bon(n: int,
                                 time_limit: int = 300,
                                 seed: int = 0,
                                 presolve: bool = True,
@@ -338,10 +338,10 @@ if __name__ == '__main__':
     SEEDS = [ 
         26, 42, 262626, 424242, 328211356, 878641, 1234567, 5656565, 9999999, 20240624, 31415926, 27182818
     ]
-    SEEDS = SEEDS[:5]  # limit for quicker tests
+    SEEDS = SEEDS[5:]  # limit for quicker tests
     bests = [
-        # ([14,16,18], "CBC", "balanced", True, 328211356, "random_half"), # nessuno e' arrivato a 18 solo alcuni a 16 (come nella vanilla version)
-        ([16], "GLPK","balanced", True, 26, ""),
+        ([14,16,18], "CBC", "balanced", True, 328211356, "random_half"), # nessuno e' arrivato a 18 solo alcuni a 16 (come nella vanilla version)
+        ([10,12,14,16], "GLPK","balanced", True, 26, ""),
         # (16, "CBC", "balanced", True, 424242, "random_half"),
         # (18, "CBC", "feasible", True, 24494897, "week1"),
         # (18,"CBC","feasible",True,262626,"week1"),
@@ -359,7 +359,7 @@ if __name__ == '__main__':
                                 out_path = os.path.join(res_dir, f"{nn}.json")
                                 global_start = time.time()
                                 try:
-                                    result, meta = build_model_with_permutations(
+                                    result, meta = build_model_with_permutations_bon(
                                         n=nn, time_limit=300, seed=seed,
                                             presolve=presolve, warm_start=warm_start,
                                             objective=objective, solver=solver, DEBUG = True)

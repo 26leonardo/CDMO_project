@@ -37,11 +37,24 @@ On PowerShell use `${PWD}` instead of `$(pwd)`.
 The container entrypoint accepts two styles of invocation:
 
 1. **No arguments (batch mode)**
-   If you run the container **without passing any arguments**, the entrypoint will sequentially run every approach:
+   If you run the container **without passing any arguments**, the entrypoint will sequentially run every approach and runs the same scripts that genereted the json files:
    `CP`, `SMT`, `MIP` — invoking `python /CDMO/source/<APPROACH>/main.py` for each approach **with default parameters**.
+    ```bash
+    docker run --rm \
+      -v "$(pwd)/source:/CDMO/source" \
+      -v "$(pwd)/res:/CDMO/res" \
+      sts-container
+    ```
 
-2. **Single-approach mode (positional or flag style)**
-   If you pass arguments, the entrypoint will run a single approach only.
+2. **Only the approach**
+    The entrypoint will run a single approach only, that generate the json files in `/CDMO/res/<APPROACH>/n.json`.
+     ```bash
+     docker run --rm -v "$(pwd)/source:/CDMO/source" -v "$(pwd)/res:/CDMO/res" \
+       sts-container MIP
+     ```
+
+3. **Single-approach mode (positional or flag style)**
+   If you pass arguments, the entrypoint will run a single approach and a single verion among the possible (see underneath) only.
 
    * **Positional form**:
 
@@ -65,65 +78,9 @@ The container entrypoint accepts two styles of invocation:
 
 * `--approach <APPROACH>` — one of `CP`, `SMT`, `MIP` (case-insensitive).
 * `--n` or `--instance <int>` — instance size (even integer).
-* `--version <str>` — version token (e.g. `v1`, `v3`, `v4`).
+* `--version <str>` — version token (e.g. `v1`).
 * `-h`, `--help` — show help (entrypoint prints usage).
 
-
----
-
-## Examples
-
-### 1) Run everything (batch mode)
-
-Runs all four approaches (`CP`, `SMT`, `MIP`) sequentially, no parameters:
-
-```bash
-docker run --rm \
-  -v "$(pwd)/source:/CDMO/source" \
-  -v "$(pwd)/res:/CDMO/res" \
-  sts-container
-```
-
-### 2) Run only MIP with positional args (n=8, version=v1)
-
-Positional style:
-
-```bash
-docker run --rm \
-  -v "$(pwd)/source:/CDMO/source" \
-  -v "$(pwd)/res:/CDMO/res" \
-  sts-container MIP 8 v1
-```
-
-This calls `/CDMO/source/MIP/main.py --instance 8 --version v1`.
-
-### 3) Run only MIP with flag args (identical behavior)
-
-Flag style (note the `--` after the image):
-
-```bash
-docker run --rm \
-  -v "$(pwd)/source:/CDMO/source" \
-  -v "$(pwd)/res:/CDMO/res" \
-  sts-container -- --approach MIP --n 8 --version v1
-```
-
-### 4) Enter an interactive shell in the container (dev debugging)
-
-If you want a shell inside the image (mounting your source/res):
-
-```bash
-docker run --rm -it \
-  -v "$(pwd)/source:/CDMO/source" \
-  -v "$(pwd)/res:/CDMO/res" \
-  sts-container /bin/bash
-```
-
-Then you can run commands manually inside the container, e.g.:
-
-```bash
-python /CDMO/source/MIP/main.py --instance 8 --version v1
-```
 
 ---
 
@@ -174,6 +131,7 @@ The following list serves as index to know which version runs a particular model
 | `v4`                  | the best CBC and GLPK **pre** - **feasible/balanced**.                                                                             |
 | `v5`                  | **seed-sensitivity sweep** — runs the same CBC base-feasible case over many seeds (0, 1234567, 26, 42, 262626, 424242, 878641, 5656565). Usefull to see how changing seed, changes the the performance of the same model.          |
 | `v6`                  | **GLPK robustness & cuts** — multiple GLPK combos (seeds, cuts on/off, base vs i\<j) usefull to check the performance of GLPK |
+|`v7`|Runs a CBC-**balanced** instance using the obj func that min the max, instead of doing the sumary of the modules. To show that for CBC does not help the performance.|
 
 #### Where results are written
 
@@ -188,3 +146,21 @@ The following list serves as index to know which version runs a particular model
   ```
   /CDMO/res/additional_tests/{n}.json
   ```
+
+## Entrypoint interactive shell in the container (dev debugging)
+
+If you want a shell inside the image (mounting your source/res), decomment the dev code inside the dockerfile and comment the part about `PRODUCTION script`.  
+Build the new image and run the command:
+
+```bash
+docker run --rm -it \
+  -v "$(pwd)/source:/CDMO/source" \
+  -v "$(pwd)/res:/CDMO/res" \
+  sts-container /bin/bash
+```
+
+Then you can run commands manually inside the container, e.g.:
+
+```bash
+python /CDMO/source/MIP/main.py --instance 8 --version v1
+```
