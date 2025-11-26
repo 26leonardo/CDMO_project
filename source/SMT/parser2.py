@@ -7,12 +7,12 @@ def main():
     # define the arguments of the parser
     ap = argparse.ArgumentParser(description="Parse SMT2 model and update res/SMT/{N}.json")
     ap.add_argument("--solver", default="z3", choices=["z3", "cvc5", 'math', 'opti'], help="Solver binary")
-    ap.add_argument("--approach", choices=["channeled", "preprocess"], help="approach to use")
+    ap.add_argument("--approach", default='preprocess', choices=["channeled", "preprocess"], help="approach to use")
     ap.add_argument("--timeout", type=int, default=300, help="Timeout seconds")
     ap.add_argument("--N", type=int, required=False, help="Teams (even). If omitted, inferred.")
     ap.add_argument("--optimize", default='false', choices=["False", "True", 'true', 'false'], help="Optimization is required?")
     ap.add_argument("--outdir", default="res/SMT", help="Output directory")
-    ap.add_argument("--minmax", default="false", help="Output directory")
+    ap.add_argument("--minmax", default="true")
     ap.add_argument("--seed", default=90, help="Seed")
     args = ap.parse_args()
 
@@ -27,10 +27,10 @@ def main():
         minmax=False
     if opt in ['true', 'True']:
         opt=True
-        approach = f'{args.solver}_{args.approach}_opt'
+        approach = f'{args.solver}_opt'
     else:
         opt=False
-        approach = f'{args.solver}_{args.approach}'
+        approach = f'{args.solver}'
         
     if args.solver=='z3' and N<=14:
         if args.approach=='preprocess':
@@ -266,6 +266,8 @@ def main():
     # Objective: sum_t |2*home_t - W|
     counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
     obj = int(sum(abs(2*c - W) for c in counts))
+    if minmax is True:
+        obj=max(count)
     #obj-=N
 
     # Merge/update JSON
@@ -279,14 +281,17 @@ def main():
 
     existing[approach] = {
         "time": int(total_time),
-        "optimal": True if obj==N else False,
+        "optimal": True if obj==1 else False,
         "obj": obj,
         "sol": sol
     }
     with open(outpath, "w") as f:
         json.dump(existing, f)
     print(f"[OK] {approach}_{N} → {outpath}  (time={int(total_time)}s, obj={obj})")
-    print(counts)
+    if minmax is False:
+        print(counts)
+    else:
+        print(count)
 
 
 if __name__ == "__main__":
