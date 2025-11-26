@@ -503,7 +503,7 @@
     ]
   },
   "CBC_prepro_anchor_feasible_week1": {
-    "time": 44,
+    "time": 45,
     "optimal": true,
     "obj": null,
     "sol": [
@@ -1021,6 +1021,12 @@
     "time": 300,
     "optimal": false,
     "obj": null,
+    "sol": []
+  },
+  "bon_GLPK_prepro_anchor_balanced_dual": {
+    "time": 300,
+    "optimal": false,
+    "obj": 0,
     "sol": []
   }
 }

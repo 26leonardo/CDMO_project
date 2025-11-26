@@ -400,7 +400,7 @@ def run_v3_single(n, module_v123):
             print(f"[ERROR] writing single v3 json: {e}")
             traceback.print_exc()
 
-def run_v4_single(n, module_v4):
+def run_v4_single(n, module_v4, cases = None):
     """
     For version v4 and given n run two configurations (chosen as "analogous"):
         (n, "CBC", "balanced", True, 328211356, "random_half"),
@@ -409,12 +409,14 @@ def run_v4_single(n, module_v4):
         (n, "GLPK","feasible", True, 26, "")
     Save outputs to res/additional_tests/{n}.json
     """
-    cases = [
-        (n, "CBC", "balanced", True, 328211356, "random_half"),
-        (n, "CBC", "feasible", True, 26, "week1"),
-        (n, "GLPK","balanced", True, 26, ""),
-        (n, "GLPK","feasible", True, 26, "")
-    ]
+    if cases is None:
+        cases = [
+            (n, "CBC", "balanced", True, 328211356, "random_half"),
+            (n, "CBC", "feasible", True, 26, "week1"),
+            (n, "GLPK","balanced", True, 26, ""),
+            (n, "GLPK","feasible", True, 26, "")
+        ]
+    
     out_dir = os.path.join(HERE, "..", "..", "res", "additional_tests")
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, f"{n}.json")
@@ -751,64 +753,70 @@ def run_v6_single(n, module_v123, module_v4):
                 print(f"[ERROR] writing v6 v4 json: {e}")
                 traceback.print_exc()
 
-def run_v7_single(n, v4_obj_path):
+def run_v7_single(n, module_v4, module_v4_obj):
     """
     v7: run a CBC case via v_4_objective 
     (n, "CBC","balanced", True, 328211356, "random_half")
     The results shows that for CBC using the obj func with
     max does not help the performance.
     """
+    seeds = [26, 42, 262626, 424242, 328211356]
+    cases = [(n, "CBC","balanced", True, seed, "random_half") for seed in seeds]
+    run_v4_single(n, module_v4, cases=cases)
+
     out_dir = os.path.join(HERE, "..", "..", "res", "additional_tests")
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, f"{n}.json")
 
     nn = n
     solver = "CBC"
-    seed = 328211356
     presolve = True
     objective = "balanced"
     warm_start = "random_half"
-    global_start = time.time()
-    try:
-        if hasattr(import_module(v4_obj_path), "build_model_with_permutations_bon"):
-            result_meta = import_module(v4_obj_path).build_model_with_permutations_bon(
-                n=nn,
-                time_limit=300,
-                seed=seed,
-                presolve=presolve,
-                warm_start=warm_start,
-                objective=objective,
-                solver=solver
-            )
-            if isinstance(result_meta, tuple) and len(result_meta) == 2:
-                result, meta = result_meta
+    
+
+    for seed in seeds:
+        global_start = time.time()
+        try:
+            if hasattr(module_v4_obj, "build_model_with_permutations_bon"):
+                result_meta = module_v4_obj.build_model_with_permutations_bon(
+                    n=nn,
+                    time_limit=300,
+                    seed=seed,
+                    presolve=presolve,
+                    warm_start=warm_start,
+                    objective=objective,
+                    solver=solver
+                )
+                if isinstance(result_meta, tuple) and len(result_meta) == 2:
+                    result, meta = result_meta
+                else:
+                    result = result_meta
+                    meta = {"pulp_status":"ok","runtime_sec":0.0}
             else:
-                result = result_meta
-                meta = {"pulp_status":"ok","runtime_sec":0.0}
-        else:
-            print("[WARN] v_4_objective has no build_model_with_permutations_bon; running script fallback")
-            import runpy
-            runpy.run_path(os.path.join(os.path.dirname(v4_obj_path), "v_4_objective.py"), run_name="__main__")
+                print("[WARN] v_4_objective has no build_model_with_permutations_bon; running script fallback")
+                import runpy
+                runpy.run_path(os.path.join(os.path.dirname(v4_obj_path), "v_4_objective.py"), run_name="__main__")
+                result = make_default_result()
+                meta = {"pulp_status":"ran_script","runtime_sec":0.0}
+        except Exception as e:
+            print(f"[ERROR] single v7 run n={nn} solver={solver}: {e}")
+            traceback.print_exc()
             result = make_default_result()
-            meta = {"pulp_status":"ran_script","runtime_sec":0.0}
-    except Exception as e:
-        print(f"[ERROR] single v7 run n={nn} solver={solver}: {e}")
-        traceback.print_exc()
-        result = make_default_result()
-        meta = {"pulp_status":"error","runtime_sec":0.0}
-    global_end = time.time()
-    total_runtime = global_end - global_start
+            meta = {"pulp_status":"error","runtime_sec":0.0}
+        global_end = time.time()
+        total_runtime = global_end - global_start
 
-    key = f"{solver}_preprocessing_{objective}_{warm_start}_{seed}"
-    print(f"[DONE] n={nn} approach= {key} presolve={presolve}  -> {out_path}")
-    print(f"Status: {meta.get('pulp_status','?')} | optimal={result.get('optimal',False)} | obj={result.get('obj',None)}")
-    print(f"Runtime (total, incl. 'presolve') = {total_runtime:.2f}s (time field written: {result.get('time')})")
+        key = f"bon_{solver}_preprocessing_{objective}_{warm_start}_{seed}"
+        print(f"[DONE] n={nn} approach= {key} presolve={presolve}  -> {out_path}")
+        print(f"Status: {meta.get('pulp_status','?')} | optimal={result.get('optimal',False)} | obj={result.get('obj',None)}")
+        print(f"Runtime (total, incl. 'presolve') = {total_runtime:.2f}s (time field written: {result.get('time')})")
 
-    try:
-        write_merge_json(out_path, key, result)
-    except Exception as e:
-        print(f"[ERROR] writing single v7 json: {e}")
-        traceback.print_exc()
+        try:
+            write_merge_json(out_path, key, result)
+        except Exception as e:
+            print(f"[ERROR] writing single v7 json: {e}")
+            traceback.print_exc()
 
         
 # ---- Entry point ------------------------------------------------------------
@@ -887,7 +895,7 @@ If args -> expects --version <v1|v2|v3|v4|v5|v6> --instance <n>
         # v6 needs both modules (v_1_2_3 and v_4)
         run_v6_single(n, module_v123, module_v4)
     elif ver in ("v7",):
-        run_v7_single(n, v4_obj_path)
+        run_v7_single(n, module_v4, module_v4_obj)
     else:
         print(f"[ERROR] Unknown version token: {args.version}", file=sys.stderr)
         sys.exit(4)

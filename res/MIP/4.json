@@ -46,5 +46,11 @@
     "optimal": true,
     "obj": null,
     "sol": []
+  },
+  "bon_GLPK_prepro_anchor_balanced_dual": {
+    "time": 0,
+    "optimal": true,
+    "obj": 0,
+    "sol": []
   }
 }

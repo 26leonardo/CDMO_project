@@ -336,12 +336,17 @@ if __name__ == '__main__':
     # simple driver: iterate combinations (nota: passiamo presolve correttamente)
     # seed used ofr tests = 0,1234567,26,42,262626,424242,878641,5656565
     SEEDS = [ 
-        26, 42, 262626, 424242, 328211356, 878641, 1234567, 5656565, 9999999, 20240624, 31415926, 27182818
+        26, 42, 262626, 424242, 328211356, 878641, 1234567, 5656565, 9999999, 20240624, 31415926, 27182818,
+        6677618, 24494897, 16180339, 14142135, 17320508, 22360679, 73205080, 12345678, 87654321,
+        11111111, 22222222, 33333333, 44444444, 55555555, 66666666, 77777777, 88888888, 99999999,
+        12121212, 34343434, 56565656, 78787878, 90909090,
+        13579246, 24681357, 11223344, 44332211, 10203040, 40506070, 70809010, 12312312, 32132132,
+        55566677, 77766655, 88899900, 23457012, 21098765, 56789012, 21012345, 34567890
     ]
     SEEDS = SEEDS[5:]  # limit for quicker tests
     bests = [
-        ([14,16,18], "CBC", "balanced", True, 328211356, "random_half"), # nessuno e' arrivato a 18 solo alcuni a 16 (come nella vanilla version)
-        ([10,12,14,16], "GLPK","balanced", True, 26, ""),
+        ([18], "CBC", "balanced", True, 328211356, "random_half"), # nessuno e' arrivato a 18 solo alcuni a 16 (come nella vanilla version)
+        # ([10,12,14,16], "GLPK","balanced", True, 26, ""),
         # (16, "CBC", "balanced", True, 424242, "random_half"),
         # (18, "CBC", "feasible", True, 24494897, "week1"),
         # (18,"CBC","feasible",True,262626,"week1"),
@@ -373,9 +378,9 @@ if __name__ == '__main__':
 
                                 key = ""
                                 if solver == "CBC":
-                                    key = f"{solver}_prepro_anchor_{objective}_{warm_start}_{seed}"
+                                    key = f"bon_{solver}_prepo_{objective}_{warm_start}_{seed}"
                                 else:
-                                    key = f"{solver}_preproc_anchor_{objective}_dual_{seed}"
+                                    key = f"bon_{solver}_preproc_anchor_{objective}_dual_{seed}"
                                 payload = { key: result }
 
                                 old_data = {}
