@@ -77,6 +77,7 @@ def main():
             T, W, P = N, N - 1, N // 2
             Home = read_grid(assigns, "Home", T, W, default=False)
             counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
+            count = [abs(2 * c - W) for c in counts]
             obj = int(sum(abs(2 * c - W) for c in counts))
             print(counts)
         else:
@@ -117,6 +118,7 @@ def main():
                 counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
                 obj = int(sum(abs(2 * c - W) for c in counts))
                 status=get_status(stdout)
+                count = [abs(2 * c - W) for c in counts]
                 print(count)
 
 
