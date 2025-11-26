@@ -63,19 +63,34 @@ def symmetry_breaking_constraints(N, solver, Home, Per, Opp):
     return solver
 
 # function used for imposing the optimization constraints for both approaches
-def smt_obj_manual(N, Home, obj, counts, solver):
+def smt_obj_manual(N, Home, obj, counts, solver, maxs=False):
     W=N-1
     
     # count the number of home games
     count_home = [Sum([If(Home[t][w], 1, 0) for w in range(W)]) for t in range(N)]
-    for t in range(N):
-        # implied constraint to make the home games converge faster
-        solver.add(count_home[t]<=max(counts))
-        solver.add(count_home[t]>=min(counts))
-    
-    # Upper bound and lower bound are imposed on the objective function
-    solver.add(Sum([Abs(2*count_home[t] - W) for t in range(N)]) <obj)
-    solver.add(Sum([Abs(2*count_home[t] - W) for t in range(N)]) >=N)
+    if maxs is False:
+        
+        for t in range(N):
+            # implied constraint to make the home games converge faster
+            solver.add(count_home[t]<=max(counts))
+            solver.add(count_home[t]>=min(counts))
+
+        # Upper bound and lower bound are imposed on the objective function
+        solver.add(Sum([Abs(2*count_home[t] - W) for t in range(N)]) <obj)
+        solver.add(Sum([Abs(2*count_home[t] - W) for t in range(N)]) >=N)
+    else:
+        abs_diff = []
+        for t in range(N):
+            diff = 2 * count_home[t]-W
+            abs_t = Abs(diff)
+            abs_diff.append(abs_t)
+
+        for t1, t2 in zip(range(N-1), range(1, N)):
+            solver.add(abs_diff[t1] >= abs_diff[t2])   # abs_diff[0] is max
+
+        # if you want an upper bound from previous counts:
+        solver.add(abs_diff[0]> 0)
+        solver.add(abs_diff[0] < max(counts))
 
     # return the solver and Home
     return solver, Home

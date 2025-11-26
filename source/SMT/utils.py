@@ -315,5 +315,3 @@ def get_status(stdout: str) -> str:
         return "timeout"
     if any("sat" in ln for ln in lines):
         return "sat"
-    if any("unknown" in ln for ln in lines):
-        return "unknown"
