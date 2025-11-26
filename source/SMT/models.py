@@ -66,7 +66,7 @@ def channeled_model_no_check(N):
 
     return formula, Per, Home
 
-def channeled_model_no_check_opt(N, counts, obj):
+def channeled_model_no_check_opt(N, counts, obj, maxs=False):
     W = N - 1
     P = N // 2
 
@@ -113,14 +113,31 @@ def channeled_model_no_check_opt(N, counts, obj):
             constraints.append(LE(Plus([Ite(Equals(Per[t][w],Int(p)), Int(1), Int(0)) for w in range(W)]),Int(2)))
 
     count_home = [Plus([Ite(Home[t][w], Int(1), Int(0)) for w in range(W)]) for t in range(N)]
-    for t in range(N):
-        # implied constraint to make the home games converge faster
-        constraints.append(LE(count_home[t],Int(max(counts))))
-        constraints.append(GE(count_home[t],Int(min(counts))))
-    
-    # Upper bound and lower bound are imposed on the objective function
-    constraints.append(LT(Plus([Ite(GE(Times(Int(2),count_home[t]) - Int(W),Int(0)), Times(Int(2),count_home[t]) - Int(W), Int(W)-Times(Int(2),count_home[t])) for t in range(N)]), Int(obj)))
-    constraints.append(GE(Plus([Ite(GE(Times(Int(2),count_home[t]) - Int(W),Int(0)), Times(Int(2),count_home[t]) - Int(W), Int(W)-Times(Int(2),count_home[t])) for t in range(N)]), Int(N)))
+
+    if maxs is False:
+
+        for t in range(N):
+            # implied constraint to make the home games converge faster
+            constraints.append(LE(count_home[t],Int(max(counts))))
+            constraints.append(GE(count_home[t],Int(min(counts))))
+
+        # Upper bound and lower bound are imposed on the objective function
+        constraints.append(LT(Plus([Ite(GE(Times(Int(2),count_home[t]) - Int(W),Int(0)), Times(Int(2),count_home[t]) - Int(W), Int(W)-Times(Int(2),count_home[t])) for t in range(N)]), Int(obj)))
+        constraints.append(GE(Plus([Ite(GE(Times(Int(2),count_home[t]) - Int(W),Int(0)), Times(Int(2),count_home[t]) - Int(W), Int(W)-Times(Int(2),count_home[t])) for t in range(N)]), Int(N)))
+    else:
+        abs_diff = []
+        for t in range(N):
+            diff = Times(Int(2),count_home[t]) - Int(W) 
+            abs_t = Ite(GE(diff , Int(0)), diff, -diff)
+            abs_diff.append(abs_t)
+
+        M = Symbol('M', INT)
+        for t in range(N):
+            constraints.append(GE(M,abs_diff[t]))
+
+        #Upper bound and lower bound are imposed on the objective function
+        constraints.append(LT(M,Int(max(counts))))
+        constraints.append(GE(M,Int(1)))
 
     # Break global home/away flip
     constraints.append(Home[0][0])
@@ -216,7 +233,7 @@ def preprocess_approach_domains(N):
 
     return formula, Per, Home
 
-def preprocess_approach_domains_opt(N, counts, obj):
+def preprocess_approach_domains_opt(N, counts, obj,maxs=False):
     assert N % 2 == 0 and N >= 4
     W, P = N - 1, N // 2
 
@@ -264,16 +281,35 @@ def preprocess_approach_domains_opt(N, counts, obj):
     for w in range(W):
         for (u,v) in matches[w]:
             constraints.append(Xor(Home[u-1][w], Home[v-1][w]))
-
+#
     count_home = [Plus([Ite(Home[t][w], Int(1), Int(0)) for w in range(W)]) for t in range(N)]
-    for t in range(N):
-        # implied constraint to make the home games converge faster
-        constraints.append(LE(count_home[t],Int(max(counts))))
-        constraints.append(GE(count_home[t],Int(min(counts))))
-    
-    # Upper bound and lower bound are imposed on the objective function
-    constraints.append(LT(Plus([Ite(GE(Times(Int(2),count_home[t]) - Int(W),Int(0)), Times(Int(2),count_home[t]) - Int(W), Int(W)-Times(Int(2),count_home[t])) for t in range(N)]), Int(obj)))
-    constraints.append(GE(Plus([Ite(GE(Times(Int(2),count_home[t]) - Int(W),Int(0)), Times(Int(2),count_home[t]) - Int(W), Int(W)-Times(Int(2),count_home[t])) for t in range(N)]), Int(N)))
+    if maxs is False:
+        for t in range(N):
+            # implied constraint to make the home games converge faster
+            constraints.append(LE(count_home[t],Int(max(counts))))
+            constraints.append(GE(count_home[t],Int(min(counts))))
+
+        # Upper bound and lower bound are imposed on the objective function
+        diffs = [Times(Int(2), count_home[t]) - Int(W) for t in range(N)]
+        abs_terms = [Ite(GE(d, Int(0)), d, -d) for d in diffs]
+
+        sum_abs = Plus(abs_terms)
+
+        constraints.append(LT(sum_abs, Int(obj)))
+        constraints.append(GE(sum_abs, Int(N)))
+    else:
+        abs_diff = []
+        for t in range(N):
+            diff = Times(Int(2),count_home[t]) - Int(W) 
+            abs_t = Ite(GE(diff , Int(0)), diff, -diff)
+            abs_diff.append(abs_t)
+
+        for t1, t2 in zip(range(N-1), range(1, N)):
+            constraints.append(GE(abs_diff[t1] , abs_diff[t2]))
+
+        #Upper bound and lower bound are imposed on the objective function
+        constraints.append(LT(abs_diff[0],Int(max(counts))))
+        constraints.append(GE(abs_diff[0],Int(1)))
 
     # Break global home/away flip
     constraints.append(Home[0][0])

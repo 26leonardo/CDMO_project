@@ -12,6 +12,7 @@ def main():
     ap.add_argument("--N", type=int, required=False, help="Teams (even). If omitted, inferred.")
     ap.add_argument("--optimize", default='false', choices=["False", "True", 'true', 'false'], help="Optimization is required?")
     ap.add_argument("--outdir", default="res/SMT", help="Output directory")
+    ap.add_argument("--minmax", default="false", help="Output directory")
     ap.add_argument("--seed", default=90, help="Seed")
     args = ap.parse_args()
 
@@ -20,6 +21,10 @@ def main():
     total_time=0
     opt=args.optimize
     seed=args.seed
+    if args.minmax in ['true', 'True']:
+        minmax=True
+    else:
+        minmax=False
     if opt in ['true', 'True']:
         opt=True
         approach = f'{args.solver}_{args.approach}_opt'
@@ -84,7 +89,10 @@ def main():
                 start3=time.time()
                 mid=(N+obj)//2
                 s, Per, Home, Opp = channeled_model_no_check(N)
-                s, Home = smt_obj_manual(N, Home, mid, counts, s)
+                if minmax is False: 
+                    s, Home = smt_obj_manual(N, Home, mid, counts, s)
+                else:
+                    s, Home = smt_obj_manual(N, Home, mid, count, s, maxs=minmax)
                 s = symmetry_breaking_constraints(N, s, Home, Per, Opp)
                 smt = s.to_smt2()
 
@@ -109,7 +117,7 @@ def main():
                 counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
                 obj = int(sum(abs(2 * c - W) for c in counts))
                 status=get_status(stdout)
-                print(counts)
+                print(count)
 
 
 
@@ -143,10 +151,11 @@ def main():
             T, W, P = N, N - 1, N // 2
             Home = read_grid(assigns, "Home", T, W, default=False)
             counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
+            count = [abs(2 * c - W) for c in counts]
             obj = int(sum(abs(2 * c - W) for c in counts))
             #obj-=N
-            
-            print(counts)
+            print(count)
+            #print(counts)
         else:
             # handle timeout/unsat
             pass
@@ -158,7 +167,10 @@ def main():
                 start4=time.time()
                 mid=(obj+N)//2
                 s, Home, Per, matches = preprocess_approach_domains(N)
-                s, Home = smt_obj_manual(N, Home, mid, counts, s)
+                if minmax is False: 
+                    s, Home = smt_obj_manual(N, Home, mid, counts, s)
+                else:
+                    s, Home = smt_obj_manual(N, Home, mid, count, s, maxs=minmax)
                 s = symmetry_breaking_constraints_preprocess(N, s, Home, Per, matches)
                 smt = s.to_smt2()
 
@@ -181,13 +193,17 @@ def main():
                 Per = read_grid(assigns, "Per", T, W, default=None)
                 Home = read_grid(assigns, "Home", T, W, default=False)
                 counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
+                count = [abs(2 * c - W) for c in counts]
                 obj = int(sum(abs(2 * c - W) for c in counts))
                 #obj-=N
                 status=get_status(stdout)
-                print(counts)
-
+                print(count)
+                #print(counts)
+        
+    if status=='timeout':
+        total_time=300
     
-    if (status in ('timeout', 'unknown')) and solved==0:
+    if (status in ('timeout')) and solved==0:
         N = args.N or 0
         os.makedirs(args.outdir, exist_ok=True)
         outpath = os.path.join(args.outdir, f"{N}.json") if N else os.path.join(args.outdir, "unknownN.json")
@@ -201,7 +217,7 @@ def main():
         print(f"[TIMEOUT] merged placeholder into {outpath}")
         return
 
-    if (status in ('unsat')) and solved==0:
+    if (status in ('unsat','unknown')) and solved==0:
         N = args.N or 0
         os.makedirs(args.outdir, exist_ok=True)
         outpath = os.path.join(args.outdir, f"{N}.json") if N else os.path.join(args.outdir, "unknownN.json")
@@ -215,6 +231,7 @@ def main():
         print(f"[UNSAT] merged placeholder into {outpath}")
         return
 
+    
 
     if (status=='timeout' or status in ('unknown','unsat') ) and solved>0:
         assigns = parse_model(sol1)

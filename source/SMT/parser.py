@@ -12,6 +12,7 @@ def main():
     ap.add_argument("--N", type=int, required=False, help="Teams (even). If omitted, inferred.")
     ap.add_argument("--optimize", default='false', choices=["False", "True", 'true', 'false'], help="Optimization is required?")
     ap.add_argument("--outdir", default="res/SMT", help="Output directory")
+    ap.add_argument("--minmax", default="false", choices=["False", "True", 'true', 'false'])
     ap.add_argument("--seed", default=90, help="Seed")
     args = ap.parse_args()
 
@@ -20,6 +21,11 @@ def main():
     total_time=0
     opt=args.optimize
     seed=args.seed
+    if args.minmax in ['false', 'False']:
+        minmax=False
+    else:
+        minmax=True
+
     if args.solver=='z3' and N<=14:
         if args.approach=='preprocess':
             phase_sel=4
@@ -32,10 +38,14 @@ def main():
             phase_sel=4
     else:
         phase_sel=None
-    if opt in ['true', 'True']:
+
+    if opt in ['true', 'True'] and minmax:
+        opt=True
+        approach = f'py_{args.solver}_{args.approach}_opt_mm'
+    elif opt in ['true', 'True']:
         opt=True
         approach = f'py_{args.solver}_{args.approach}_opt'
-    else:
+    elif opt in ['false', 'False']:
         opt=False
         approach = f'py_{args.solver}_{args.approach}'
 
@@ -66,8 +76,9 @@ def main():
             T, W, P = N, N - 1, N // 2
             Home = read_grid(assigns, "Home", T, W, default=False)
             counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
+            count = [abs(2 * c - W) for c in counts]
             obj = int(sum(abs(2 * c - W) for c in counts))
-            print(counts)
+            print(count)
         else:
             # handle timeout/unsat
             pass
@@ -77,7 +88,10 @@ def main():
                 sol1, sol2 = stdout, stderr
                 start2=time.time()
                 mid=(obj+N)//2
-                s, Per, Home = channeled_model_no_check_opt(N, counts, mid)
+                if minmax is False:
+                    s, Per, Home = channeled_model_no_check_opt(N, counts, mid)
+                else:
+                    s, Per, Home = channeled_model_no_check_opt(N, count, mid, maxs=True)
                 s=s.simplify()
                 write_smtlib(s, f'source/{approach}_{N}.smt2')
                 with open(f'source/{approach}_{N}.smt2', "a") as f:
@@ -86,7 +100,7 @@ def main():
                 # Run the solver
                 diff2=time.time()-start2
                 total_time+=int(diff2)
-                stdout, stderr, elapsed4 = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=phase_sel)
+                stdout, stderr, elapsed4 = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=5)
                 os.remove(f'source/{approach}_{N}.smt2')
                 total_time += int(elapsed4)
 
@@ -97,9 +111,10 @@ def main():
                 Per = read_grid(assigns, "Per", T, W, default=None)
                 Home = read_grid(assigns, "Home", T, W, default=False)
                 counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
+                count = [abs(2 * c - W) for c in counts]
                 obj = int(sum(abs(2 * c - W) for c in counts))
                 status=get_status(stdout)
-                print(counts)
+                print(count)
 
 
     elif args.approach == 'preprocess':
@@ -131,8 +146,8 @@ def main():
             Home = read_grid(assigns, "Home", T, W, default=False)
             counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
             obj = int(sum(abs(2 * c - W) for c in counts))
-            
-            print(counts)
+            count = [abs(2 * c - W) for c in counts]
+            print(count)
         else:
             # handle timeout/unsat
             pass
@@ -143,7 +158,10 @@ def main():
                 sol1, sol2 = stdout, stderr
                 start4=time.time()
                 mid=(obj+N)//2
-                s, Home, Per = preprocess_approach_domains_opt(N, counts, mid)
+                if minmax is False:
+                    s, Home, Per = preprocess_approach_domains_opt(N, counts, mid)
+                else:
+                    s, Home, Per = preprocess_approach_domains_opt(N, count, mid, maxs=True)
                 s=s.simplify()
                 write_smtlib(s, f'source/{approach}_{N}.smt2')
                 with open(f'source/{approach}_{N}.smt2', "a") as f:
@@ -163,12 +181,13 @@ def main():
                 Per = read_grid(assigns, "Per", T, W, default=None)
                 Home = read_grid(assigns, "Home", T, W, default=False)
                 counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
+                count = [abs(2 * c - W) for c in counts]
                 obj = int(sum(abs(2 * c - W) for c in counts))
                 status=get_status(stdout)
-                print(counts)
+                print(count)
 
     
-    if (status in ('timeout','unknown')) or solved==0:
+    if (status in ('timeout','unknown')) and solved==0:
         N = args.N or 0
         os.makedirs(args.outdir, exist_ok=True)
         outpath = os.path.join(args.outdir, f"{N}.json") if N else os.path.join(args.outdir, "unknownN.json")
