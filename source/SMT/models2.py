@@ -90,7 +90,7 @@ def smt_obj_manual(N, Home, obj, counts, solver, maxs=False):
 
         # if you want an upper bound from previous counts:
         solver.add(abs_diff[0]> 0)
-        solver.add(abs_diff[0] < ((max(counts)+1)//2))
+        solver.add(abs_diff[0] < max(counts))
 
     # return the solver and Home
     return solver, Home

@@ -308,7 +308,7 @@ def preprocess_approach_domains_opt(N, counts, obj,maxs=False):
             constraints.append(GE(abs_diff[t1] , abs_diff[t2]))
 
         #Upper bound and lower bound are imposed on the objective function
-        constraints.append(LT(abs_diff[0],Int((max(counts)+1)//2)))
+        constraints.append(LT(abs_diff[0],Int((max(counts)))))
         constraints.append(GE(abs_diff[0],Int(1)))
 
     # Break global home/away flip
