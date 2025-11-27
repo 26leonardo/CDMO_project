@@ -1,4 +1,16 @@
 {
+  "bon_GLPK_prepro_anchor_balanced_dual": {
+    "time": 0,
+    "optimal": true,
+    "obj": 0,
+    "sol": []
+  },
+  "bon_CBC_prepro_anchor_balanced_random_half": {
+    "time": 0,
+    "optimal": true,
+    "obj": 0,
+    "sol": []
+  },
   "CBC_base_feasible_week1_": {
     "time": 0,
     "optimal": true,
@@ -35,22 +47,16 @@
     "obj": null,
     "sol": []
   },
-  "GLPK_preproc_anchor_balanced_dual": {
+  "GLPK_prepro_anchor_balanced_dual": {
     "time": 0,
     "optimal": true,
     "obj": 0,
     "sol": []
   },
-  "GLPK_preproc_anchor_feasible_dual": {
+  "GLPK_prepro_anchor_feasible_dual": {
     "time": 0,
     "optimal": true,
     "obj": null,
-    "sol": []
-  },
-  "bon_GLPK_prepro_anchor_balanced_dual": {
-    "time": 0,
-    "optimal": true,
-    "obj": 0,
     "sol": []
   }
 }

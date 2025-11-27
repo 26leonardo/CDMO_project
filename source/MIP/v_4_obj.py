@@ -147,12 +147,12 @@ def build_model_with_permutations_bon(n: int,
             home_minus_away[t] = 2 * H_expr - (n - 1)
 
         # d represents the maximum absolute imbalance across teams
-        d = pulp.LpVariable("d", lowBound=0, upBound=(n-1), cat=pulp.LpContinuous)
+        z = pulp.LpVariable("z", lowBound=0, upBound=(n-1), cat=pulp.LpContinuous)
         for t in T:
-            prob += home_minus_away[t] <= 1+ d, f"d_ge_pos_{t}"
-            prob += -home_minus_away[t] <= 1+d, f"d_ge_neg_{t}"
+            prob += home_minus_away[t] <= 1+ z, f"z_ge_pos_{t}"
+            prob += -home_minus_away[t] <= 1+z, f"z_ge_neg_{t}"
         # objective: minimize the maximum absolute imbalance
-        prob += d, "min_max_imbalance"
+        prob += z, "min_max_imbalance"
 
 
     # --- Constraints ---
@@ -335,17 +335,12 @@ if __name__ == '__main__':
     # simple driver: iterate combinations (nota: passiamo presolve correttamente)
     # seed used ofr tests = 0,1234567,26,42,262626,424242,878641,5656565
     SEEDS = [ 
-        26, 42, 262626, 424242, 328211356, 878641, 1234567, 5656565, 9999999, 20240624, 31415926, 27182818,
-        6677618, 24494897, 16180339, 14142135, 17320508, 22360679, 73205080, 12345678, 87654321,
-        11111111, 22222222, 33333333, 44444444, 55555555, 66666666, 77777777, 88888888, 99999999,
-        12121212, 34343434, 56565656, 78787878, 90909090,
-        13579246, 24681357, 11223344, 44332211, 10203040, 40506070, 70809010, 12312312, 32132132,
-        55566677, 77766655, 88899900, 23457012, 21098765, 56789012, 21012345, 34567890
+        26, 42,  424242, 328211356, 878641, 262626,1234567, 5656565, 9999999
     ]
-    SEEDS = SEEDS[5:]  # limit for quicker tests
+    SEEDS = SEEDS[:5]  # limit for quicker tests
     bests = [
-        (16, "CBC", "balanced", True, [26, 42, 262626, 424242, 328211356], "random_half"), # nessuno e' arrivato a 18 solo alcuni a 16 (come nella vanilla version)
-        # ([10,12,14,16], "GLPK","balanced", True, 26, ""),
+        # ([12,14,16], "CBC", "balanced", True, 262626, "random_half"), # nessuno e' arrivato a 18 solo alcuni a 16 (come nella vanilla version)
+        ([14], "GLPK","balanced", True, 26, ""),
         # (16, "CBC", "balanced", True, 424242, "random_half"),
         # (18, "CBC", "feasible", True, 24494897, "week1"),
         # (18,"CBC","feasible",True,262626,"week1"),
@@ -355,10 +350,10 @@ if __name__ == '__main__':
         # CBC_prepro_anchor_feasible_week1_24494897 n = 18  "time": 182
     ]
     for seed in SEEDS:
-            for n_l ,solver, objective, presolve, _, warm_start in bests:
+        for n_l ,solver, objective, presolve,_, warm_start in bests:
                 for n in n_l:
                                 nn = n
-                                res_dir = os.path.join(os.path.dirname(__file__), "..", "..", "res", "MIP", "temp", "obj_minmax" )#,"temp", "ciao_8"
+                                res_dir = os.path.join(os.path.dirname(__file__), "..", "..", "res", "MIP", "temp", "try1" )#,"temp", "ciao_8"
                                 os.makedirs(res_dir, exist_ok=True)
                                 out_path = os.path.join(res_dir, f"{nn}.json")
                                 global_start = time.time()

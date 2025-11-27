@@ -1,6 +1,18 @@
 {
+  "bon_CBC_prepro_anchor_balanced_random_half": {
+    "time": 300,
+    "optimal": false,
+    "obj": 0,
+    "sol": []
+  },
+  "CBC_prepro_anchor_balanced_random_half": {
+    "time": 300,
+    "optimal": false,
+    "obj": 0,
+    "sol": []
+  },
   "CBC_prepro_anchor_feasible_week1": {
-    "time": 184,
+    "time": 183,
     "optimal": true,
     "obj": null,
     "sol": [
@@ -635,11 +647,5 @@
         ]
       ]
     ]
-  },
-  "CBC_prepro_anchor_balanced_random_half": {
-    "time": 300,
-    "optimal": false,
-    "obj": 0,
-    "sol": []
   }
 }
