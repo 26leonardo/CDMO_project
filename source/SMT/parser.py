@@ -74,6 +74,7 @@ def main():
             Home = read_grid(assigns, "Home", T, W, default=False)
             counts = [sum(1 if as_bool(Home[t][w]) else 0 for w in range(W)) for t in range(T)]
             count = [abs(2 * c - W) for c in counts]
+            count = [abs(2 * c - W) for c in counts]
             obj = int(sum(abs(2 * c - W) for c in counts))
             print(count)
         else:
@@ -97,7 +98,8 @@ def main():
                 # Run the solver
                 diff2=time.time()-start2
                 total_time+=int(diff2)
-                stdout, stderr, elapsed4 = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=5)
+                stdout, stderr, elapsed4 = run_solver(f'source/{approach}_{N}.smt2', args.solver, args.timeout-total_time, seed=seed, phase_sel=phase_sel)
+                count = [abs(2 * c - W) for c in counts]
                 os.remove(f'source/{approach}_{N}.smt2')
                 total_time += int(elapsed4)
 
