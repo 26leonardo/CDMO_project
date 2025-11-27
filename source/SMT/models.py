@@ -304,8 +304,9 @@ def preprocess_approach_domains_opt(N, counts, obj,maxs=False):
             abs_t = Ite(GE(diff , Int(0)), diff, -diff)
             abs_diff.append(abs_t)
 
-        for t1, t2 in zip(range(N-1), range(1, N)):
-            constraints.append(GE(abs_diff[t1] , abs_diff[t2]))
+        for t1 in range(N-1): 
+            for t2 in range(1, N):
+                constraints.append(GE(abs_diff[t1] , abs_diff[t2]))
 
         #Upper bound and lower bound are imposed on the objective function
         constraints.append(LT(abs_diff[0],Int((max(counts)))))

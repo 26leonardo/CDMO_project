@@ -85,10 +85,11 @@ def smt_obj_manual(N, Home, obj, counts, solver, maxs=False):
             abs_t = Abs(diff)
             abs_diff.append(abs_t)
 
-        for t1, t2 in zip(range(N-1), range(1, N)):
-            solver.add(abs_diff[t1] >= abs_diff[t2])   # abs_diff[0] is max
+        for t1 in range(N-1): 
+            for t2 in range(1, N):
+                solver.add(abs_diff[t1] >= abs_diff[t2])
 
-        # if you want an upper bound from previous counts:
+        
         solver.add(abs_diff[0]> 0)
         solver.add(abs_diff[0] < max(counts))
 
