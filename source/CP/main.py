@@ -191,6 +191,11 @@ def execution_cycle(n, version):
     output_path = Path(f"/CDMO/res/CP/{n}.json")
     partial_output_path = Path(f"./{PARTIAL_OUTPUT_FILENAME}")
 
+    # Create parent directory and JSON file if not present
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if not output_path.exists():
+        output_path.write_text("{}")
+
     # write preprocessed data if requested
     if round_robin:
         write_tridimensional_round_robin(n)
@@ -275,4 +280,3 @@ if __name__ == "__main__":
 
     else:
         execution_cycle(n, version)
-    
