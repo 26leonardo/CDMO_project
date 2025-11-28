@@ -159,7 +159,7 @@ def run_minizinc(model, solver, input_data_filename, timeout, version, preproces
         try:
             if unsat_solution_content == UNSATISFIABLE_SOLUTION_DEFAULT_MESSAGE:
                 print("The solution found is UNSATISFIABLE")
-                return {solver_type_key:{'sol':[],'time':300,'obj':None,'optimal':True}}
+                return {solver_type_key:{'sol':[],'time':0,'obj':None,'optimal':True}}
             elif unsat_solution_content == UNKNOWN_SOLUTION_DEFAULT_MESSAGE:
                 print("The solution HASN'T been found (UNKNOWN)")
                 return {solver_type_key:{'sol':[],'time':300,'obj':None,'optimal':False}}
