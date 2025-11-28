@@ -1,16 +1,8 @@
 #!/usr/bin/env python3
 """
-Permutation-of-preprocessed-pairs STS model (PuLP + CBC) with warm-start and
-balanced objective support (orientation variables h linked to y).
-
-- Precompute pairs via circle method (oriented pairs).
-- Decision vars: y[(w,k,per)] = pair k of week w is placed in period per.
-- If objective == "balanced": create h[(w,k,per)] binary = 1 if that assignment places
-the first team in the precomputed pair at home in that slot.
-Link: h[(w,k,per)] <= y[(w,k,per)] (so h forced 0 when y=0).
-- Balanced objective: minimize sum_t d[t], with -d[t] <= home_minus_away[t] <= d[t].
-- Warm start: options "random_full", "random_half", "week1".
-- Time limit: solver gets time_limit minus preprocessing+warmstart time.
+This module is the same as v_4.py but uses the objective function
+that minimize the maximum absolute imbalance of home/away 
+games across all teams.
 """
 
 import random, time, math, os, argparse, json, sys

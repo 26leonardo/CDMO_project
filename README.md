@@ -3,6 +3,9 @@ Project for the Combinatorial Decision Making &amp; Optimization course of the M
 
 # Docker usage (quick guide)
 
+>> WARNING: The Dockerfile was tested on both x86 and arm architectures (for arm you need to add the flag when building the image: --platform linux/amd64), but the SMT solver CVC5 is not set up to work on arm architecture.
+
+
 This README explains how to build and run the project image using **only Docker CLI**. It documents the available flags that the container entrypoint accepts, shows concrete examples, and lists the available versions and which version token to pass when you want to run a specific experiment.
 
 All commands assume you run them from the project root where the `Dockerfile` and the `source/` directory live.
@@ -102,7 +105,7 @@ The following list serves as index to know which version runs a particular model
 ---
 
 ## SMT: available versions
-The following list serves as index to know which version runs a particular model (all the cited model are described in the report).
+This is the list of the versions which are available for SMT.
 
 | version  | meaning / which implementation is used                                                                                                                                           |
 | --------------------- | ---------------------------------------------------------------------------------- |
@@ -127,9 +130,12 @@ The following list serves as index to know which version runs a particular model
 
 ---
 
+
 ## MIP: available versions 
 
-| version token to pass | meaning / which implementation is used                                                                                                                                                    |
+This is the list of the versions which are available for MIP.
+
+| version | meaning / which implementation is used                                                                                                                                                    |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `v1`                  | the best CBC and GLPK **base** — **feasible** model                                                       |
 | `v2`                  | Useful to verify the behaviour of CBC `i!=j` and compare it to `v1`/`v3`.         |
