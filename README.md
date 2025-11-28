@@ -106,16 +106,22 @@ The following list serves as index to know which version runs a particular model
 
 | version  | meaning / which implementation is used                                                                                                                                           |
 | --------------------- | ---------------------------------------------------------------------------------- |
-| `v1`                  | Will run the channeled model with the z3 solver |
-| `v2`                  | Will run the preprocessed model with the z3 solver |
-| `v3`                  | Will run the channeled model with the cvc5 solver |
-| `v4`                  | Will run the preprocessed model with the cvc5 solver |
-| `v5`                  | Will run the channeled model with the optimathsat solver |
-| `v6`                  | Will run the preprocessed model with the optimathsat solver |
+| `v1`                  | Will run the model with the Z3 solver on the pysmt encoding in decision version|
+| `v2`                  | Will run the model with the Z3 solver on the pysmt encoding in optimization version|
+| `v3`                  | Will run the model with the CVC5 solver on the pysmt encoding in decision version|
+| `v4`                  | Will run the model with the CVC5 solver on the pysmt encoding in optimization version|
+| `v5`                  | Will run the model with the OptiMathSAT solver on the pysmt encoding in decision version|
+| `v6`                  | Will run the model with the OptiMathSAT solver on the pysmt encoding in optimization version|
+| `v7`                  | Will run the model with the OptiMathSAT solver on the Z3py encoding in decision version|
+| `v8`                  | Will run the model with the Z3 solver on the Z3py encoding in optimization version|
+| `v9`                  | Will run the model with the Z3 solver on the Z3py encoding in decision version|
+| `v10`                  | Will run the model with the CVC5 solver on the Z3py encoding in optimization version|
+| `v11`                  | Will run the model with the CVC5 solver on the Z3py encoding in decision version|
+| `v12`                  | Will run the model with the OptiMathSAT solver on the Z3py encoding in optimization version|
 
   **Single-version mode** 
 * When just `--version` is passed, that version is run with all the even instances from 4 to 18;
-* When just `--n` is passed, that instance is run with all the six versions;
+* When just `--n` is passed, that instance is run with all the twelve versions;
 * When both `--version` and `--n` are passed, then the chosen instance on the chosen version is performed;
 * When none of the two is passed, all the feasible instances will be run, so the one which on the report timeout, will not run.
 
