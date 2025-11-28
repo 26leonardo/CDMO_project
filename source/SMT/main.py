@@ -5,7 +5,7 @@ import argparse
 def main():
     # define the arguments of the parser
     parser = argparse.ArgumentParser(description="SMT main driver for batch / single runs")
-    parser.add_argument("--version", type=str, default=None, help="version token: v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22, v23, v24 (or none for batch)")
+    parser.add_argument("--version", type=str, default=None, help="version token: v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12 (or none for batch)")
     parser.add_argument("--instance", "--n", dest="n", type=int, default=None, help="n (even)")
     args = parser.parse_args()
 
