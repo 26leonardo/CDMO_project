@@ -112,11 +112,11 @@ The following list serves as index to know which version runs a particular model
 | `v4`                  | Will run the model with the CVC5 solver on the pysmt encoding in optimization version|
 | `v5`                  | Will run the model with the OptiMathSAT solver on the pysmt encoding in decision version|
 | `v6`                  | Will run the model with the OptiMathSAT solver on the pysmt encoding in optimization version|
-| `v7`                  | Will run the model with the OptiMathSAT solver on the Z3py encoding in decision version|
+| `v7`                  | Will run the model with the Z3 solver on the Z3py encoding in decision version|
 | `v8`                  | Will run the model with the Z3 solver on the Z3py encoding in optimization version|
-| `v9`                  | Will run the model with the Z3 solver on the Z3py encoding in decision version|
+| `v9`                  | Will run the model with the CVC5 solver on the Z3py encoding in decision version|
 | `v10`                  | Will run the model with the CVC5 solver on the Z3py encoding in optimization version|
-| `v11`                  | Will run the model with the CVC5 solver on the Z3py encoding in decision version|
+| `v11`                  | Will run the model with the OptiMathSAT solver on the Z3py encoding in decision version|
 | `v12`                  | Will run the model with the OptiMathSAT solver on the Z3py encoding in optimization version|
 
   **Single-version mode** 
